@@ -57,6 +57,6 @@ Execution plan for [PRD.md](PRD.md). Milestones are sequential; each ends demons
 
 **Done:** production link works end-to-end.
 
-- [ ] Typecheck, lint, production build all clean
-- [ ] Deploy Convex prod + static hosting; env vars set
-- [ ] Prod smoke test: create + unwrap one gift of each of the 12 types
+- [x] Typecheck, lint, production build all clean
+- [ ] Deploy Convex prod + static hosting; env vars set — Convex prod deployed (enchanted-cardinal-983) and the build is wired to it; static hosting pending: no hosting CLI is authenticated on this machine
+- [x] Prod smoke test: create + unwrap one gift of each of the 12 types
