@@ -1,0 +1,66 @@
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router";
+import { GiftCanvas } from "./GiftCanvas";
+import type { GiftDef } from "../gifts/types";
+
+// Mounts a live scene only while the element is scrolled into view, so an
+// offscreen card frees its WebGL context instead of burning a draw loop.
+function useInView<T extends Element>() {
+  const ref = useRef<T>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.15, rootMargin: "100px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return [ref, inView] as const;
+}
+
+export function GiftPreviewCard({ def }: { def: GiftDef }) {
+  const [ref, inView] = useInView<HTMLDivElement>();
+
+  // First option value for each variant key — a neutral default preview.
+  const variants = useMemo<Record<string, string>>(
+    () =>
+      Object.fromEntries(def.variants.map((v) => [v.key, v.options[0].value])),
+    [def.variants],
+  );
+
+  return (
+    <Link
+      to={`/create/${def.id}`}
+      className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#100b14]"
+    >
+      <div
+        ref={ref}
+        className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-white/5 to-transparent transition duration-300 group-hover:border-white/20 group-hover:brightness-110"
+      >
+        {inView && (
+          <div className="absolute inset-0">
+            <GiftCanvas>
+              <Suspense fallback={null}>
+                <def.Scene
+                  variants={variants}
+                  phase="preview"
+                  senderName="You"
+                  recipientName="Someone"
+                  message=""
+                />
+              </Suspense>
+            </GiftCanvas>
+          </div>
+        )}
+      </div>
+
+      <h2 className="mt-4 font-serif text-xl text-stone-100">{def.name}</h2>
+      <p className="mt-1 text-sm text-stone-400">{def.tagline}</p>
+    </Link>
+  );
+}

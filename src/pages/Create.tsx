@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { GiftCanvas } from "../components/GiftCanvas";
 import { registry } from "../gifts/registry";
 import { MESSAGE_MAX, NAME_MAX } from "../gifts/catalog";
+import NotFound from "./NotFound";
 
 const inputClass =
   "w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-stone-100 placeholder:text-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400";
@@ -30,15 +31,10 @@ export default function Create() {
 
   if (!def) {
     return (
-      <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-6 px-6 text-center">
-        <p className="font-serif text-3xl text-stone-100">Gift not found</p>
-        <Link
-          to="/"
-          className="inline-flex min-h-[48px] items-center rounded-full bg-rose-500 px-6 text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
-        >
-          Back home
-        </Link>
-      </main>
+      <NotFound
+        heading="We don't have that gift"
+        copy="Pick one from the gallery to start personalizing it."
+      />
     );
   }
 
@@ -65,7 +61,17 @@ export default function Create() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-6 py-8">
-      <div className="h-[55vh] overflow-hidden rounded-3xl border border-white/10">
+      <Link
+        to="/"
+        className="inline-flex w-fit items-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+      >
+        ← All gifts
+      </Link>
+
+      <div className="relative h-[55vh] overflow-hidden rounded-3xl border border-white/10">
+        <span className="pointer-events-none absolute left-4 top-4 z-10 text-xs uppercase tracking-wide text-stone-500">
+          Live preview
+        </span>
         <GiftCanvas>
           <Suspense fallback={null}>
             <def.Scene
@@ -169,7 +175,7 @@ export default function Create() {
         type="button"
         disabled={!canSubmit}
         onClick={() => void handleCreate()}
-        className="min-h-[52px] rounded-full bg-rose-500 text-lg font-medium text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 disabled:cursor-not-allowed disabled:opacity-40"
+        className="min-h-[52px] w-full rounded-full bg-rose-500 text-lg font-medium text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {submitting ? "Creating…" : "Create gift"}
       </button>

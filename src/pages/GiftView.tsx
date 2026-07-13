@@ -1,11 +1,57 @@
-import { Suspense, useState } from "react";
-import { useParams } from "react-router";
+import { Suspense, useEffect, useState } from "react";
+import { Link, useParams } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { GiftCanvas } from "../components/GiftCanvas";
 import { registry } from "../gifts/registry";
+import Loading from "../components/Loading";
+import NotFound from "./NotFound";
 
 type Phase = "sealed" | "opening" | "revealed";
+
+// Mounts hidden, then flips to visible on the next frame so the block fades in.
+// Replaying unmounts this block, so the fade replays cleanly on the next reveal.
+function RevealedMessage({
+  message,
+  senderName,
+  onReplay,
+}: {
+  message: string;
+  senderName: string;
+  onReplay: () => void;
+}) {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  return (
+    <div
+      className={`mx-auto w-full max-w-md px-6 py-10 transition-all duration-700 ease-out ${
+        shown ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+      }`}
+    >
+      <p className="whitespace-pre-wrap select-text text-lg leading-relaxed text-stone-200">
+        {message}
+      </p>
+      <p className="mt-4 text-stone-400">— {senderName}</p>
+      <button
+        type="button"
+        onClick={onReplay}
+        className="mt-8 min-h-[48px] rounded-full border border-white/15 px-6 text-sm text-stone-300 transition hover:border-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+      >
+        Replay
+      </button>
+      <Link
+        to="/"
+        className="mt-6 block text-sm text-stone-500 underline-offset-4 transition hover:text-stone-300 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+      >
+        Send one back →
+      </Link>
+    </div>
+  );
+}
 
 export default function GiftView() {
   const { slug } = useParams();
@@ -14,19 +60,11 @@ export default function GiftView() {
   const [phase, setPhase] = useState<Phase>("sealed");
 
   if (gift === undefined) {
-    return (
-      <main className="flex min-h-dvh items-center justify-center px-6 text-stone-400">
-        Loading…
-      </main>
-    );
+    return <Loading />;
   }
 
   if (gift === null) {
-    return (
-      <main className="flex min-h-dvh items-center justify-center px-6 text-center text-stone-300">
-        This gift link doesn't seem to exist.
-      </main>
-    );
+    return <NotFound />;
   }
 
   const def = registry[gift.giftType];
@@ -87,19 +125,11 @@ export default function GiftView() {
       </div>
 
       {phase === "revealed" && (
-        <div className="mx-auto w-full max-w-md px-6 py-10">
-          <p className="whitespace-pre-wrap select-text text-lg leading-relaxed text-stone-200">
-            {gift.message}
-          </p>
-          <p className="mt-4 text-stone-400">— {gift.senderName}</p>
-          <button
-            type="button"
-            onClick={() => setPhase("opening")}
-            className="mt-8 min-h-[48px] rounded-full border border-white/15 px-6 text-sm text-stone-300 transition hover:border-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
-          >
-            Replay
-          </button>
-        </div>
+        <RevealedMessage
+          message={gift.message}
+          senderName={gift.senderName}
+          onReplay={() => setPhase("opening")}
+        />
       )}
     </div>
   );

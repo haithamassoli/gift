@@ -19,11 +19,11 @@ Execution plan for [PRD.md](PRD.md). Milestones are sequential; each ends demons
 
 **Done:** with one gift, the site feels like a finished product.
 
-- [ ] Gallery: card per registry entry (name, tagline), 3D preview rendered only when scrolled into view
-- [ ] Create page: variant pickers generated from registry, name/message inputs with visible char caps, live preview reflects every change
-- [ ] Sent page: copy-link button, live "Opened ✓" state, "make another" link
-- [ ] Recipient page: sealed intro ("A gift for {recipient} — from {sender}"), clear tap target, replay after reveal, message rendered as selectable HTML below the canvas
-- [ ] Loading states everywhere; friendly not-found page for bad slug/statusKey
+- [x] Gallery: card per registry entry (name, tagline), 3D preview rendered only when scrolled into view
+- [x] Create page: variant pickers generated from registry, name/message inputs with visible char caps, live preview reflects every change
+- [x] Sent page: copy-link button, live "Opened ✓" state, "make another" link
+- [x] Recipient page: sealed intro ("A gift for {recipient} — from {sender}"), clear tap target, replay after reveal, message rendered as selectable HTML below the canvas
+- [x] Loading states everywhere; friendly not-found page for bad slug/statusKey
 
 ## M3 — Gift catalog
 
