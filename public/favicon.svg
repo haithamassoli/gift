@@ -1,1 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎁</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="32" y1="0" x2="32" y2="56" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffdfa3"/>
+      <stop offset=".55" stop-color="#fb7185"/>
+      <stop offset="1" stop-color="#e11d48"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="32" cy="12" r="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffe9c4" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#ffe9c4" stop-opacity="0"/>
+    </radialGradient>
+    <path id="spark" d="M0 -8.5 C.6 -3.4 3.4 -.6 8.5 0 C3.4 .6 .6 3.4 0 8.5 C-.6 3.4 -3.4 .6 -8.5 0 C-3.4 -.6 -.6 -3.4 0 -8.5 Z"/>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#100b14"/>
+  <circle cx="32" cy="12" r="20" fill="url(#halo)"/>
+  <!-- popped lid floating above the box; ribbon is negative space in both -->
+  <path fill="url(#g)" d="M29.25 22 L17 22 Q13 22 13 26 Q13 30 17 30 L29.25 30 Z"/>
+  <path fill="url(#g)" d="M34.75 22 L47 22 Q51 22 51 26 Q51 30 47 30 L34.75 30 Z"/>
+  <path fill="url(#g)" d="M29.25 33 L22 33 Q17 33 17 38 L17 48 Q17 53 22 53 L29.25 53 Z"/>
+  <path fill="url(#g)" d="M34.75 33 L42 33 Q47 33 47 38 L47 48 Q47 53 42 53 L34.75 53 Z"/>
+  <!-- the bow became a star -->
+  <g fill="url(#g)" stroke="#100b14" stroke-width="2" paint-order="stroke">
+    <use href="#spark" transform="translate(32 13.5)"/>
+    <use href="#spark" transform="translate(47.5 8) scale(.36)"/>
+    <circle cx="17.5" cy="7.5" r="1.5"/>
+  </g>
+</svg>

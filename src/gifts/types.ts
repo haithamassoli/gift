@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import type { GiftCatalogEntry } from "./catalog";
+import type { Lang } from "../i18n";
 
 export type GiftPhase = "preview" | "sealed" | "opening" | "revealed";
 
@@ -9,6 +10,7 @@ export interface SceneProps {
   senderName: string;
   recipientName: string;
   message: string;
+  lang: Lang;
   onOpenComplete?: () => void;
 }
 

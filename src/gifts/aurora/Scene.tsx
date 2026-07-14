@@ -6,6 +6,7 @@ import type { SceneProps } from "../types";
 import { useOpeningClock } from "../useOpeningClock";
 import { makeRadialSprite } from "../sprites";
 import { makeTextTexture } from "../text3d";
+import { forRecipient } from "../../i18n";
 
 /* ---------- deterministic pseudo-random (stable across renders) ---------- */
 function mulberry32(seed: number) {
@@ -261,7 +262,7 @@ const moonTex = makeRadialSprite(64, [
 
 const OPEN_END = 5.1;
 
-export default function AuroraScene({ variants, phase, message, recipientName, onOpenComplete }: SceneProps) {
+export default function AuroraScene({ variants, phase, message, recipientName, lang, onOpenComplete }: SceneProps) {
   const palette = PALETTES[variants.palette] ?? PALETTES.emerald;
   const { t: tRef, done: doneRef } = useOpeningClock(phase);
 
@@ -298,7 +299,7 @@ export default function AuroraScene({ variants, phase, message, recipientName, o
     };
   }, [starMat, sparkMat]);
 
-  const msg = message.trim() || (recipientName.trim() ? `For ${recipientName.trim()}` : "");
+  const msg = message.trim() || (recipientName.trim() ? forRecipient(lang, recipientName) : "");
   const textPack = useMemo(() => {
     if (!msg) return null;
     const fontSize = 72;
@@ -309,6 +310,7 @@ export default function AuroraScene({ variants, phase, message, recipientName, o
       glow: 16,
       glowColor: palette.glow,
       maxWidthPx: fontSize * (msg.length > 80 ? 16 : 9),
+      lang,
     });
     const material = new THREE.MeshBasicMaterial({
       map: texture,
@@ -325,7 +327,7 @@ export default function AuroraScene({ variants, phase, message, recipientName, o
       h *= k;
     }
     return { material, w, h };
-  }, [msg, palette]);
+  }, [msg, palette, lang]);
   useEffect(() => {
     if (!textPack) return;
     return () => {

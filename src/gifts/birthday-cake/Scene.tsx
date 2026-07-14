@@ -189,6 +189,7 @@ export default function BirthdayCakeScene({
   senderName,
   recipientName,
   message,
+  lang,
   onOpenComplete,
 }: SceneProps) {
   const palette = PALETTES[variants.frosting] ?? PALETTES.vanilla;
@@ -253,7 +254,8 @@ export default function BirthdayCakeScene({
   /* ---- in-scene text textures (materials created in JSX so refs can animate them) ---- */
   const text = useMemo(() => {
     const rn = recipientName?.trim();
-    const title = makeTextTexture("Happy Birthday" + (rn ? `\n${rn}` : "!"), {
+    const happy = lang === "ar" ? "عيد ميلاد سعيد" : "Happy Birthday";
+    const title = makeTextTexture(happy + (rn ? `\n${rn}` : "!"), {
       fontSize: 74,
       fontWeight: "800",
       fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
@@ -262,6 +264,7 @@ export default function BirthdayCakeScene({
       glowColor: "#ffb04d",
       maxWidthPx: 900,
       lineHeight: 1.12,
+      lang,
     });
     const msgBody = message?.trim();
     const sn = senderName?.trim();
@@ -279,12 +282,13 @@ export default function BirthdayCakeScene({
         glowColor: "#ff9d55",
         maxWidthPx: 720,
         lineHeight: 1.32,
+        lang,
       });
       msgTex = m.texture;
       msgAspect = m.aspect;
     }
     return { titleTex: title.texture, titleAspect: title.aspect, msgTex, msgAspect, hasMsg };
-  }, [recipientName, message, senderName]);
+  }, [recipientName, message, senderName, lang]);
   useEffect(() => {
     return () => {
       text.titleTex.dispose();

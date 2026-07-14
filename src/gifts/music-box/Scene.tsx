@@ -5,6 +5,7 @@ import * as THREE from "three";
 import type { SceneProps } from "../types";
 import { useOpeningClock } from "../useOpeningClock";
 import { makeTextTexture } from "../text3d";
+import { forRecipient } from "../../i18n";
 import { makeRadialSprite } from "../sprites";
 
 /* ---------- deterministic pseudo-random (stable across renders) ---------- */
@@ -202,7 +203,7 @@ function runScheduler(a: AudioState) {
 
 const TRIM = "#d9a441";
 
-export default function MusicBoxScene({ variants, phase, recipientName, message, onOpenComplete }: SceneProps) {
+export default function MusicBoxScene({ variants, phase, recipientName, message, lang, onOpenComplete }: SceneProps) {
   const figPalette = FIG_PALETTES[variants.figurine] ?? FIG_PALETTES.ballerina;
 
   /* variant material: rebuilds live on variant change, disposed on cleanup */
@@ -220,7 +221,7 @@ export default function MusicBoxScene({ variants, phase, recipientName, message,
   useEffect(() => () => figMat.dispose(), [figMat]);
 
   /* engraved message on the inside of the lid */
-  const lidText = message.trim() || (recipientName.trim() ? `For ${recipientName.trim()}` : "For You");
+  const lidText = message.trim() || forRecipient(lang, recipientName);
   const lidData = useMemo(() => {
     const t = makeTextTexture(lidText, {
       fontSize: 62,
@@ -231,6 +232,7 @@ export default function MusicBoxScene({ variants, phase, recipientName, message,
       glowColor: "#caa03a",
       maxWidthPx: 62 * 8,
       lineHeight: 1.32,
+      lang,
     });
     const baseW = 1.0;
     let w = baseW;
@@ -242,7 +244,7 @@ export default function MusicBoxScene({ variants, phase, recipientName, message,
       h = maxH;
     }
     return { tex: t.texture, w, h };
-  }, [lidText]);
+  }, [lidText, lang]);
   useEffect(() => {
     const d = lidData;
     return () => d.tex.dispose();
@@ -259,6 +261,7 @@ export default function MusicBoxScene({ variants, phase, recipientName, message,
       color: "#f0d089",
       glow: 6,
       glowColor: "#b8862e",
+      lang,
     });
     const baseW = 0.6;
     let w = baseW;
@@ -270,7 +273,7 @@ export default function MusicBoxScene({ variants, phase, recipientName, message,
       h = maxH;
     }
     return { tex: t.texture, w, h };
-  }, [recipientName]);
+  }, [recipientName, lang]);
   useEffect(() => {
     const d = nameData;
     return () => d?.tex.dispose();

@@ -5,6 +5,7 @@ import * as THREE from "three";
 import type { SceneProps } from "../types";
 import { makeRadialSprite } from "../sprites";
 import { makeTextTexture } from "../text3d";
+import { forRecipient } from "../../i18n";
 
 /* ---------- deterministic pseudo-random (stable across renders) ---------- */
 function mulberry32(seed: number) {
@@ -230,6 +231,7 @@ export default function ConstellationScene({
   phase,
   message,
   recipientName,
+  lang,
   onOpenComplete,
 }: SceneProps) {
   const shape = variants.shape ?? "heart";
@@ -239,7 +241,7 @@ export default function ConstellationScene({
 
   /* message texture (rebuilt on message change, disposed in cleanup) */
   const msg = useMemo(() => {
-    const text = (message ?? "").trim() || `For ${(recipientName ?? "").trim() || "you"}`;
+    const text = (message ?? "").trim() || forRecipient(lang, recipientName ?? "");
     const built = makeTextTexture(text, {
       fontSize: 84,
       fontFamily: "Georgia, 'Times New Roman', serif",
@@ -249,6 +251,7 @@ export default function ConstellationScene({
       glowColor: "#ffcf8f",
       maxWidthPx: 1100,
       lineHeight: 1.34,
+      lang,
     });
     let mw = 2.4; // <= 2.6 requirement
     let mh = mw * built.aspect;
@@ -258,7 +261,7 @@ export default function ConstellationScene({
       mh = MAXH;
     }
     return { texture: built.texture, mw, mh };
-  }, [message, recipientName]);
+  }, [message, recipientName, lang]);
 
   /* shared canvas textures */
   const spriteTex = useMemo(

@@ -226,6 +226,7 @@ export default function GoldenLocketScene({
   senderName,
   recipientName,
   message,
+  lang,
   onOpenComplete,
 }: SceneProps) {
   const pal = PALETTES[variants.metal] ?? PALETTES.gold;
@@ -246,8 +247,8 @@ export default function GoldenLocketScene({
   useEffect(() => () => metalMat.dispose(), [metalMat]);
 
   const engraving = useMemo(() => {
-    const sender = senderName || "Someone";
-    const recipient = recipientName || "You";
+    const sender = senderName || (lang === "ar" ? "شخص ما" : "Someone");
+    const recipient = recipientName || (lang === "ar" ? "أنت" : "You");
     const cover = makeTextTexture(`${sender}  ♥  ${recipient}`, {
       fontFamily: "Georgia, 'Times New Roman', serif",
       fontWeight: "600",
@@ -256,6 +257,7 @@ export default function GoldenLocketScene({
       maxWidthPx: 62 * 6,
       lineHeight: 1.28,
       padding: 40,
+      lang,
     });
     const body = makeTextTexture(message || "—", {
       fontFamily: "Georgia, 'Times New Roman', serif",
@@ -265,6 +267,7 @@ export default function GoldenLocketScene({
       maxWidthPx: 46 * 8,
       lineHeight: 1.34,
       padding: 34,
+      lang,
     });
     return {
       cover,
@@ -272,7 +275,7 @@ export default function GoldenLocketScene({
       coverSize: fitPlane(cover.aspect, 0.38, 0.24),
       bodySize: fitPlane(body.aspect, 0.48, 0.35),
     };
-  }, [senderName, recipientName, message]);
+  }, [senderName, recipientName, message, lang]);
   useEffect(
     () => () => {
       engraving.cover.texture.dispose();

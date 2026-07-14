@@ -202,6 +202,7 @@ export default function ButterflyJarScene({
   phase,
   recipientName,
   message,
+  lang,
   onOpenComplete,
 }: SceneProps) {
   const palette = PALETTES[variants.glow] ?? PALETTES.aqua;
@@ -210,9 +211,10 @@ export default function ButterflyJarScene({
   const sys = useMemo(() => buildSystem(), []);
 
   // Text formation targets (particle text via sampleTextPoints).
-  const textSource = message.trim() || recipientName.trim() || "For you";
+  const textSource =
+    message.trim() || recipientName.trim() || (lang === "ar" ? "إليك" : "For you");
   const targets = useMemo(() => {
-    const tp = sampleTextPoints(textSource, { maxPoints: 300, fontSize: 90, seed: 5 });
+    const tp = sampleTextPoints(textSource, { maxPoints: 300, fontSize: 90, seed: 5, lang });
     const count = Math.max(1, tp.count);
     const maxH = 1.7;
     let worldW = 2.6;
@@ -229,7 +231,7 @@ export default function ButterflyJarScene({
       arr[1] = FORMATION_Y;
     }
     return { arr, count };
-  }, [textSource]);
+  }, [textSource, lang]);
 
   // Variant materials: built here, keyed on the palette object, disposed on change.
   const { flyMat, glowMat } = useMemo(() => {

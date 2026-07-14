@@ -1,4 +1,9 @@
 import * as THREE from "three";
+import type { Lang } from "../i18n";
+
+// Arabic rasterizes in Thmanyah with rtl bidi; everything else keeps its Latin
+// font. Centralized here so scenes only pass `lang`.
+const AR_FONT = "'Thmanyah Sans', system-ui, sans-serif";
 
 // Shared text helpers for gift scenes. Fully procedural: rasterize text on an
 // offscreen 2D canvas, then either sample opaque pixels as particle targets
@@ -47,6 +52,8 @@ export interface TextPointsOptions {
   /** Sampling grid step in px (default 3). Smaller = denser candidates. */
   step?: number;
   seed?: number;
+  /** "ar" overrides fontFamily to Thmanyah and sets rtl bidi. */
+  lang?: Lang;
 }
 
 export interface TextPoints {
@@ -72,11 +79,15 @@ export function sampleTextPoints(text: string, opts: TextPointsOptions = {}): Te
     lineHeight = 1.25,
     step = 3,
     seed = 1,
+    lang,
   } = opts;
+  const family = lang === "ar" ? AR_FONT : fontFamily;
+  const rtl = lang === "ar";
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.font = `${fontWeight} ${fontSize}px ${family}`;
+  if (rtl) ctx.direction = "rtl";
   const lines = wrapLines(ctx, text, maxWidthPx);
 
   const lineHeightPx = fontSize * lineHeight;
@@ -86,8 +97,9 @@ export function sampleTextPoints(text: string, opts: TextPointsOptions = {}): Te
   canvas.width = width;
   canvas.height = height;
 
-  // Canvas state resets on resize — set the font again.
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  // Canvas state resets on resize — set the font/direction again.
+  ctx.font = `${fontWeight} ${fontSize}px ${family}`;
+  if (rtl) ctx.direction = "rtl";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#fff";
@@ -134,6 +146,8 @@ export interface TextTextureOptions {
   maxWidthPx?: number;
   lineHeight?: number;
   padding?: number;
+  /** "ar" overrides fontFamily to Thmanyah and sets rtl bidi. */
+  lang?: Lang;
 }
 
 export interface TextTexture {
@@ -154,11 +168,15 @@ export function makeTextTexture(text: string, opts: TextTextureOptions = {}): Te
     maxWidthPx = fontSize * 12,
     lineHeight = 1.3,
     padding = fontSize * 0.5,
+    lang,
   } = opts;
+  const family = lang === "ar" ? AR_FONT : fontFamily;
+  const rtl = lang === "ar";
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d")!;
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.font = `${fontWeight} ${fontSize}px ${family}`;
+  if (rtl) ctx.direction = "rtl";
   const lines = wrapLines(ctx, text, maxWidthPx);
 
   const lineHeightPx = fontSize * lineHeight;
@@ -167,7 +185,8 @@ export function makeTextTexture(text: string, opts: TextTextureOptions = {}): Te
   canvas.width = width;
   canvas.height = height;
 
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.font = `${fontWeight} ${fontSize}px ${family}`;
+  if (rtl) ctx.direction = "rtl";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = color;

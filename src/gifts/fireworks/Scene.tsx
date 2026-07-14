@@ -6,6 +6,7 @@ import type { SceneProps } from "../types";
 import { useOpeningClock } from "../useOpeningClock";
 import { makeRadialSprite } from "../sprites";
 import { sampleTextPoints, type TextPoints } from "../text3d";
+import { forRecipient, type Lang } from "../../i18n";
 
 /* ---------- palettes ---------- */
 interface Palette {
@@ -44,7 +45,7 @@ const ROCKET = 4; // rise, spawn trail, explode at apex
 interface Rocket {
   slot: number;
   targetY: number;
-  payload: { kind: "sphere" } | { kind: "text"; word: string };
+  payload: { kind: "sphere" } | { kind: "text"; word: string; lang: Lang };
 }
 
 class Pool {
@@ -103,8 +104,8 @@ function setColor(pool: Pool, i: number, hex: string, intensity = 1) {
 /* ---------- message chunking ---------- */
 // ponytail: legibility cap — long messages spell their first 6 chunks, then the
 // finale; the full text is always shown as HTML after the reveal.
-function chunkMessage(message: string, recipientName: string): string[] {
-  const source = message.trim() || `For ${recipientName.trim() || "you"}`;
+function chunkMessage(message: string, recipientName: string, lang: Lang): string[] {
+  const source = message.trim() || forRecipient(lang, recipientName);
   const words = source.split(/\s+/).filter(Boolean);
   const chunks: string[] = [];
   let cur = "";
@@ -122,16 +123,18 @@ function chunkMessage(message: string, recipientName: string): string[] {
 }
 
 const textCache = new Map<string, TextPoints>();
-function textPoints(word: string): TextPoints {
-  let pts = textCache.get(word);
+function textPoints(word: string, lang: Lang): TextPoints {
+  const key = `${lang}:${word}`;
+  let pts = textCache.get(key);
   if (!pts) {
     pts = sampleTextPoints(word, {
       maxPoints: Math.min(320, Math.max(90, word.length * 26)),
       fontSize: 110,
       fontWeight: "800",
       seed: 7,
+      lang,
     });
-    textCache.set(word, pts);
+    textCache.set(key, pts);
   }
   return pts;
 }
@@ -177,9 +180,9 @@ function burstSphere(sim: Sim, palette: Palette, x: number, y: number, big = fal
   }
 }
 
-function burstText(sim: Sim, palette: Palette, word: string, x: number, y: number) {
+function burstText(sim: Sim, palette: Palette, word: string, x: number, y: number, lang: Lang) {
   const { pool } = sim;
-  const pts = textPoints(word);
+  const pts = textPoints(word, lang);
   const width = Math.min(sim.maxTextWidth, Math.max(1.1, word.length * 0.24));
   for (let k = 0; k < pts.count; k++) {
     const i = pool.spawn();
@@ -264,7 +267,7 @@ function stepRockets(sim: Sim, palette: Palette, boom?: (big: boolean) => void) 
         burstSphere(sim, palette, pool.px[i], pool.py[i], true);
         boom?.(true);
       } else {
-        burstText(sim, palette, rk.payload.word, pool.px[i], pool.py[i]);
+        burstText(sim, palette, rk.payload.word, pool.px[i], pool.py[i], rk.payload.lang);
         boom?.(false);
       }
     } else {
@@ -372,6 +375,7 @@ export default function FireworksScene({
   phase,
   recipientName,
   message,
+  lang,
   onOpenComplete,
 }: SceneProps) {
   const palette = PALETTES[variants.palette] ?? PALETTES.festival;
@@ -393,7 +397,7 @@ export default function FireworksScene({
 
   // Opening show timeline: intro rocket, then one text burst per chunk, then finale.
   const show = useMemo(() => {
-    const chunks = chunkMessage(message, recipientName);
+    const chunks = chunkMessage(message, recipientName, lang);
     const events: { t: number; x: number; word?: string }[] = [{ t: 0.05, x: 0.3 }];
     chunks.forEach((word, i) => {
       events.push({ t: 1.7 + i * 2.1, x: (i % 2 === 0 ? -1 : 1) * 0.35, word });
@@ -402,7 +406,7 @@ export default function FireworksScene({
     const finaleT = lastBurst + 2.2;
     events.push({ t: finaleT, x: -0.9 }, { t: finaleT + 0.25, x: 0.9 }, { t: finaleT + 0.5, x: 0 });
     return { events, end: finaleT + 1.6 };
-  }, [message, recipientName]);
+  }, [message, recipientName, lang]);
 
   useEffect(() => {
     if (phase === "opening" && simRef.current) {
@@ -441,7 +445,7 @@ export default function FireworksScene({
       while (sim.eventCursor < events.length && events[sim.eventCursor].t <= t) {
         const ev = events[sim.eventCursor++];
         if (ev.word) {
-          launchRocket(sim, palette, ev.x * (sim.maxTextWidth / 2.4), { kind: "text", word: ev.word }, 1.0);
+          launchRocket(sim, palette, ev.x * (sim.maxTextWidth / 2.4), { kind: "text", word: ev.word, lang }, 1.0);
         } else {
           launchRocket(sim, palette, ev.x * 1.4, { kind: "sphere" });
         }
@@ -456,8 +460,8 @@ export default function FireworksScene({
     if ((phase === "preview" || phase === "revealed") && sim.worldT > sim.ambientNext) {
       sim.ambientNext = sim.worldT + 2.2 + Math.random() * 1.4;
       if (phase === "preview" && Math.random() < 0.3) {
-        const chunk = chunkMessage(message, recipientName)[0];
-        launchRocket(sim, palette, (Math.random() - 0.5) * 1.2, { kind: "text", word: chunk });
+        const chunk = chunkMessage(message, recipientName, lang)[0];
+        launchRocket(sim, palette, (Math.random() - 0.5) * 1.2, { kind: "text", word: chunk, lang });
       } else {
         launchRocket(sim, palette, (Math.random() - 0.5) * 2.4, { kind: "sphere" });
       }

@@ -200,6 +200,7 @@ export default function MessageBottleScene({
   senderName,
   recipientName,
   message,
+  lang,
   onOpenComplete,
 }: SceneProps) {
   const P = PALETTES[variants.time] ?? PALETTES.sunset;
@@ -263,8 +264,9 @@ export default function MessageBottleScene({
     const lines: string[] = [];
     const rn = recipientName.trim();
     const sn = senderName.trim();
-    const msg = message.trim() || "Thinking of you, always.";
-    if (rn) lines.push(`Dear ${rn},`);
+    const msg =
+      message.trim() || (lang === "ar" ? "أفكّر فيك دائمًا." : "Thinking of you, always.");
+    if (rn) lines.push(lang === "ar" ? `عزيزي ${rn}،` : `Dear ${rn},`);
     lines.push(msg);
     if (sn) lines.push(`— ${sn}`);
     const { texture, aspect } = makeTextTexture(lines.join("\n\n"), {
@@ -275,6 +277,7 @@ export default function MessageBottleScene({
       maxWidthPx: 860,
       lineHeight: 1.4,
       padding: 60,
+      lang,
     });
     const W = 1.7;
     const H = W * aspect;
@@ -288,7 +291,7 @@ export default function MessageBottleScene({
       vBase[i] = (posAttr.getY(i) + H / 2) / H; // 0 at bottom edge, 1 at top edge
     }
     return { texture, geo, xBase, vBase, L: H, R: 0.11, fitScale: Math.min(1, 2.35 / H) };
-  }, [message, senderName, recipientName]);
+  }, [message, senderName, recipientName, lang]);
 
   useEffect(() => {
     return () => {

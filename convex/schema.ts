@@ -8,6 +8,9 @@ export default defineSchema({
     recipientName: v.string(),
     message: v.string(),
     variants: v.record(v.string(), v.string()),
+    // Language the sender created the gift in — optional for back-compat with
+    // rows written before i18n (read as "en").
+    lang: v.optional(v.union(v.literal("en"), v.literal("ar"))),
     slug: v.string(),
     statusKey: v.string(),
     openedAt: v.optional(v.number()),

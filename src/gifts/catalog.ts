@@ -3,77 +3,115 @@
 export interface VariantDef {
   key: string;
   label: string;
-  options: { value: string; label: string }[];
+  labelAr?: string;
+  options: { value: string; label: string; labelAr?: string }[];
 }
 
 export interface GiftCatalogEntry {
   id: string;
   name: string;
+  nameAr?: string;
   tagline: string;
+  taglineAr?: string;
   variants: VariantDef[];
 }
 
 export const NAME_MAX = 40;
 export const MESSAGE_MAX = 280;
 
-const opts = (...pairs: [string, string][]) =>
-  pairs.map(([value, label]) => ({ value, label }));
+// Local "en" | "ar" instead of importing Lang from i18n — keeps this module free
+// of any React/DOM coupling so the Convex bundle stays clean.
+export const pick = (lang: "en" | "ar", en: string, ar?: string) =>
+  lang === "ar" && ar ? ar : en;
+
+const opts = (...triples: [string, string, string?][]) =>
+  triples.map(([value, label, labelAr]) => ({ value, label, labelAr }));
 
 export const catalog: Record<string, GiftCatalogEntry> = {
   "eternal-rose": {
     id: "eternal-rose",
     name: "Eternal Rose",
+    nameAr: "وردة أبدية",
     tagline: "A glass-domed rose that blooms just for them",
+    taglineAr: "وردة تحت قبة زجاجية تتفتّح من أجلهم",
     variants: [
       {
         key: "petal",
         label: "Petal color",
-        options: opts(["red", "Crimson"], ["white", "Ivory"], ["midnight-gold", "Midnight Gold"]),
+        labelAr: "لون البتلات",
+        options: opts(
+          ["red", "Crimson", "قرمزي"],
+          ["white", "Ivory", "عاجي"],
+          ["midnight-gold", "Midnight Gold", "ذهبي ليلي"],
+        ),
       },
     ],
   },
   fireworks: {
     id: "fireworks",
     name: "Fireworks",
+    nameAr: "ألعاب نارية",
     tagline: "Bursts that spell your words across the night",
+    taglineAr: "انفجارات تكتب كلماتك عبر الليل",
     variants: [
       {
         key: "palette",
         label: "Palette",
-        options: opts(["festival", "Festival"], ["rose-gold", "Rose Gold"], ["neon", "Neon"]),
+        labelAr: "لوحة الألوان",
+        options: opts(
+          ["festival", "Festival", "احتفال"],
+          ["rose-gold", "Rose Gold", "ذهبي وردي"],
+          ["neon", "Neon", "نيون"],
+        ),
       },
     ],
   },
   "snow-globe": {
     id: "snow-globe",
     name: "Snow Globe",
+    nameAr: "كرة الثلج",
     tagline: "A tiny world that swirls when they shake it",
+    taglineAr: "عالم صغير يتماوج حين يهزّونه",
     variants: [
       {
         key: "scene",
         label: "Scene",
-        options: opts(["cabin", "Cabin"], ["forest", "Pine Forest"], ["heart", "Heart"]),
+        labelAr: "المشهد",
+        options: opts(
+          ["cabin", "Cabin", "كوخ"],
+          ["forest", "Pine Forest", "غابة صنوبر"],
+          ["heart", "Heart", "قلب"],
+        ),
       },
       {
         key: "particles",
         label: "Particles",
-        options: opts(["snow", "Snow"], ["stardust", "Stardust"]),
+        labelAr: "الجُسيمات",
+        options: opts(["snow", "Snow", "ثلج"], ["stardust", "Stardust", "غبار النجوم"]),
       },
     ],
   },
   "birthday-cake": {
     id: "birthday-cake",
     name: "Birthday Cake",
+    nameAr: "كعكة عيد ميلاد",
     tagline: "Light the candles, then blow them all out",
+    taglineAr: "أشعل الشموع ثم أطفئها جميعًا",
     variants: [
       {
         key: "frosting",
         label: "Frosting",
-        options: opts(["chocolate", "Chocolate"], ["strawberry", "Strawberry"], ["vanilla", "Vanilla"]),
+        labelAr: "الكريمة",
+        options: opts(
+          ["chocolate", "Chocolate", "شوكولاتة"],
+          ["strawberry", "Strawberry", "فراولة"],
+          ["vanilla", "Vanilla", "فانيلا"],
+        ),
       },
       {
         key: "candles",
         label: "Candles",
+        labelAr: "الشموع",
         options: opts(
           ...Array.from({ length: 24 }, (_, i): [string, string] => [String(i + 1), String(i + 1)]),
         ),
@@ -83,52 +121,81 @@ export const catalog: Record<string, GiftCatalogEntry> = {
   constellation: {
     id: "constellation",
     name: "Constellation",
+    nameAr: "كوكبة",
     tagline: "A sky that draws itself, just for them",
+    taglineAr: "سماء ترسم نفسها، من أجلهم",
     variants: [
       {
         key: "shape",
         label: "Shape",
-        options: opts(["heart", "Heart"], ["star", "Star"], ["infinity", "Infinity"]),
+        labelAr: "الشكل",
+        options: opts(
+          ["heart", "Heart", "قلب"],
+          ["star", "Star", "نجمة"],
+          ["infinity", "Infinity", "لانهاية"],
+        ),
       },
     ],
   },
   "butterfly-jar": {
     id: "butterfly-jar",
     name: "Butterfly Jar",
+    nameAr: "جرة الفراشات",
     tagline: "Unscrew the lid, set the glow free",
+    taglineAr: "افتح الغطاء وأطلق الوهج",
     variants: [
       {
         key: "glow",
         label: "Glow",
-        options: opts(["aqua", "Aqua"], ["violet", "Violet"], ["amber", "Amber"]),
+        labelAr: "الوهج",
+        options: opts(
+          ["aqua", "Aqua", "سماوي"],
+          ["violet", "Violet", "بنفسجي"],
+          ["amber", "Amber", "كهرماني"],
+        ),
       },
     ],
   },
   "lantern-sky": {
     id: "lantern-sky",
     name: "Lantern Sky",
+    nameAr: "سماء الفوانيس",
     tagline: "Lanterns rise, carrying your words",
+    taglineAr: "فوانيس ترتفع حاملةً كلماتك",
     variants: [
       {
         key: "color",
         label: "Lantern color",
-        options: opts(["amber", "Amber"], ["crimson", "Crimson"], ["jade", "Jade"]),
+        labelAr: "لون الفانوس",
+        options: opts(
+          ["amber", "Amber", "كهرماني"],
+          ["crimson", "Crimson", "قرمزي"],
+          ["jade", "Jade", "يشمي"],
+        ),
       },
     ],
   },
   "balloon-bunch": {
     id: "balloon-bunch",
     name: "Balloon Bunch",
+    nameAr: "باقة بالونات",
     tagline: "A bouquet of balloons lifts your note",
+    taglineAr: "باقة بالونات ترفع رسالتك",
     variants: [
       {
         key: "palette",
         label: "Palette",
-        options: opts(["warm", "Warm"], ["pastel", "Pastel"], ["gold", "Gold"]),
+        labelAr: "لوحة الألوان",
+        options: opts(
+          ["warm", "Warm", "دافئ"],
+          ["pastel", "Pastel", "باستيل"],
+          ["gold", "Gold", "ذهبي"],
+        ),
       },
       {
         key: "count",
         label: "Balloons",
+        labelAr: "البالونات",
         options: opts(["7", "7"], ["12", "12"], ["20", "20"]),
       },
     ],
@@ -136,48 +203,76 @@ export const catalog: Record<string, GiftCatalogEntry> = {
   "message-bottle": {
     id: "message-bottle",
     name: "Message in a Bottle",
+    nameAr: "رسالة في زجاجة",
     tagline: "Washed ashore, corked, and meant for them",
+    taglineAr: "جرفها الموج إلى الشاطئ، مسدودة، ومُوجَّهة إليهم",
     variants: [
       {
         key: "time",
         label: "Time of day",
-        options: opts(["sunset", "Sunset"], ["night", "Night"], ["dawn", "Dawn"]),
+        labelAr: "وقت اليوم",
+        options: opts(
+          ["sunset", "Sunset", "غروب"],
+          ["night", "Night", "ليل"],
+          ["dawn", "Dawn", "فجر"],
+        ),
       },
     ],
   },
   "music-box": {
     id: "music-box",
     name: "Music Box",
+    nameAr: "صندوق موسيقى",
     tagline: "Wind it open for a tiny, twinkling waltz",
+    taglineAr: "أدره ليعزف لحن فالس صغيرًا متلألئًا",
     variants: [
       {
         key: "figurine",
         label: "Figurine",
-        options: opts(["ballerina", "Ballerina"], ["heart", "Heart"], ["moon", "Moon"]),
+        labelAr: "التمثال",
+        options: opts(
+          ["ballerina", "Ballerina", "راقصة باليه"],
+          ["heart", "Heart", "قلب"],
+          ["moon", "Moon", "قمر"],
+        ),
       },
     ],
   },
   "golden-locket": {
     id: "golden-locket",
     name: "Golden Locket",
+    nameAr: "قلادة ذهبية",
     tagline: "Two names, kept close",
+    taglineAr: "اسمان، قريبان دائمًا",
     variants: [
       {
         key: "metal",
         label: "Metal",
-        options: opts(["gold", "Gold"], ["silver", "Silver"], ["rose-gold", "Rose Gold"]),
+        labelAr: "المعدن",
+        options: opts(
+          ["gold", "Gold", "ذهب"],
+          ["silver", "Silver", "فضة"],
+          ["rose-gold", "Rose Gold", "ذهبي وردي"],
+        ),
       },
     ],
   },
   aurora: {
     id: "aurora",
     name: "Aurora",
+    nameAr: "شفق قطبي",
     tagline: "Northern lights with your words woven in",
+    taglineAr: "أضواء شمالية تتخلّلها كلماتك",
     variants: [
       {
         key: "palette",
         label: "Palette",
-        options: opts(["emerald", "Emerald"], ["magenta", "Magenta"], ["ice", "Ice"]),
+        labelAr: "لوحة الألوان",
+        options: opts(
+          ["emerald", "Emerald", "زمردي"],
+          ["magenta", "Magenta", "أرجواني"],
+          ["ice", "Ice", "جليدي"],
+        ),
       },
     ],
   },

@@ -2,6 +2,8 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 import { GiftCanvas } from "./GiftCanvas";
 import type { GiftDef } from "../gifts/types";
+import { pick } from "../gifts/catalog";
+import type { Lang } from "../i18n";
 
 // Mounts a live scene only while the element is scrolled into view, so an
 // offscreen card frees its WebGL context instead of burning a draw loop.
@@ -23,7 +25,7 @@ function useInView<T extends Element>() {
   return [ref, inView] as const;
 }
 
-export function GiftPreviewCard({ def }: { def: GiftDef }) {
+export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
   const [ref, inView] = useInView<HTMLDivElement>();
 
   // First option value for each variant key — a neutral default preview.
@@ -49,9 +51,10 @@ export function GiftPreviewCard({ def }: { def: GiftDef }) {
                 <def.Scene
                   variants={variants}
                   phase="preview"
-                  senderName="You"
-                  recipientName="Someone"
+                  senderName={pick(lang, "You", "أنت")}
+                  recipientName={pick(lang, "Someone", "شخص ما")}
                   message=""
+                  lang={lang}
                 />
               </Suspense>
             </GiftCanvas>
@@ -59,8 +62,12 @@ export function GiftPreviewCard({ def }: { def: GiftDef }) {
         )}
       </div>
 
-      <h2 className="mt-4 font-serif text-xl text-stone-100">{def.name}</h2>
-      <p className="mt-1 text-sm text-stone-400">{def.tagline}</p>
+      <h2 className="mt-4 font-serif text-xl text-stone-100">
+        {pick(lang, def.name, def.nameAr)}
+      </h2>
+      <p className="mt-1 text-sm text-stone-400">
+        {pick(lang, def.tagline, def.taglineAr)}
+      </p>
     </Link>
   );
 }

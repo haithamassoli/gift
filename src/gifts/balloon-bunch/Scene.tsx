@@ -136,7 +136,7 @@ function roundedRect(w: number, h: number, r: number): THREE.Shape {
   return s;
 }
 
-export default function BalloonBunchScene({ variants, phase, message, onOpenComplete }: SceneProps) {
+export default function BalloonBunchScene({ variants, phase, message, lang, onOpenComplete }: SceneProps) {
   const palette = PALETTES[variants.palette] ?? PALETTES.warm;
   const count = useMemo(() => {
     const n = parseInt(variants.count ?? "12", 10);
@@ -157,13 +157,14 @@ export default function BalloonBunchScene({ variants, phase, message, onOpenComp
       color: palette.tagText,
       maxWidthPx: 62 * 15,
       lineHeight: 1.32,
+      lang,
     });
     const TW = 1.3;
     const textH = Math.min(1.8, Math.max(0.3, TW * aspect));
     const tagCenterY = TAG_TOP_Y - (textH + 0.28) / 2;
     const tagGeo = new THREE.ShapeGeometry(roundedRect(TW + 0.26, textH + 0.28, 0.09));
     return { texture, hasText, TW, textH, tagCenterY, tagGeo };
-  }, [message, palette]);
+  }, [message, palette, lang]);
   useEffect(() => {
     return () => {
       tagAssets.texture.dispose();

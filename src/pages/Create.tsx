@@ -4,7 +4,9 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { GiftCanvas } from "../components/GiftCanvas";
 import { registry } from "../gifts/registry";
-import { MESSAGE_MAX, NAME_MAX } from "../gifts/catalog";
+import { MESSAGE_MAX, NAME_MAX, pick } from "../gifts/catalog";
+import { useArabicFontReady } from "../gifts/useArabicFontReady";
+import { useLang, LangToggle } from "../i18n";
 import NotFound from "./NotFound";
 
 const inputClass =
@@ -15,6 +17,10 @@ export default function Create() {
   const def = giftType ? registry[giftType] : undefined;
   const createGift = useMutation(api.gifts.createGift);
   const navigate = useNavigate();
+  const { lang, t } = useLang();
+  const rtl = lang === "ar";
+  // Gate the Arabic preview until Thmanyah loads so the one-time raster is branded.
+  const fontReady = useArabicFontReady(lang === "ar");
 
   const [variants, setVariants] = useState<Record<string, string>>(() =>
     def
@@ -30,12 +36,7 @@ export default function Create() {
   const [error, setError] = useState<string | null>(null);
 
   if (!def) {
-    return (
-      <NotFound
-        heading="We don't have that gift"
-        copy="Pick one from the gallery to start personalizing it."
-      />
-    );
+    return <NotFound heading={t.create.unknownHeading} copy={t.create.unknownCopy} />;
   }
 
   const canSubmit =
@@ -51,48 +52,65 @@ export default function Create() {
         recipientName: recipientName.trim(),
         message: message.trim(),
         variants,
+        lang,
       });
       navigate(`/sent/${statusKey}`);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t.create.error);
       setSubmitting(false);
     }
   };
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-6 py-8">
-      <Link
-        to="/"
-        className="inline-flex w-fit items-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
-      >
-        ← All gifts
-      </Link>
+    <main
+      dir={rtl ? "rtl" : "ltr"}
+      lang={lang}
+      className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-6 py-8"
+    >
+      <div className="flex items-center justify-between">
+        <Link
+          to="/"
+          className="inline-flex w-fit items-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+        >
+          {t.create.back}
+        </Link>
+        <LangToggle />
+      </div>
 
       <div className="relative h-[55vh] overflow-hidden rounded-3xl border border-white/10">
-        <span className="pointer-events-none absolute left-4 top-4 z-10 text-xs uppercase tracking-wide text-stone-500">
-          Live preview
+        <span className="pointer-events-none absolute start-4 top-4 z-10 text-xs uppercase tracking-wide text-stone-500">
+          {t.create.livePreview}
         </span>
         <GiftCanvas>
           <Suspense fallback={null}>
-            <def.Scene
-              variants={variants}
-              phase="preview"
-              senderName={senderName}
-              recipientName={recipientName}
-              message={message}
-            />
+            {(lang === "en" || fontReady) && (
+              <def.Scene
+                variants={variants}
+                phase="preview"
+                senderName={senderName}
+                recipientName={recipientName}
+                message={message}
+                lang={lang}
+              />
+            )}
           </Suspense>
         </GiftCanvas>
       </div>
 
       <div>
-        <h1 className="font-serif text-3xl text-stone-100">{def.name}</h1>
-        <p className="mt-1 text-sm text-stone-400">{def.tagline}</p>
+        <h1 className="font-serif text-3xl text-stone-100">
+          {pick(lang, def.name, def.nameAr)}
+        </h1>
+        <p className="mt-1 text-sm text-stone-400">
+          {pick(lang, def.tagline, def.taglineAr)}
+        </p>
       </div>
 
       {def.variants.map((variant) => (
         <div key={variant.key}>
-          <p className="mb-2 text-sm font-medium text-stone-300">{variant.label}</p>
+          <p className="mb-2 text-sm font-medium text-stone-300">
+            {pick(lang, variant.label, variant.labelAr)}
+          </p>
           {variant.options.length > 6 ? (
             <select
               value={variants[variant.key]}
@@ -103,7 +121,7 @@ export default function Create() {
             >
               {variant.options.map((option) => (
                 <option key={option.value} value={option.value} className="bg-[#100b14]">
-                  {option.label}
+                  {pick(lang, option.label, option.labelAr)}
                 </option>
               ))}
             </select>
@@ -125,7 +143,7 @@ export default function Create() {
                       : "border border-white/15 text-stone-300 hover:border-white/30"
                   }`}
                 >
-                  {option.label}
+                  {pick(lang, option.label, option.labelAr)}
                 </button>
               );
             })}
@@ -136,7 +154,7 @@ export default function Create() {
 
       <label className="block">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-stone-300">Your name</span>
+          <span className="text-sm font-medium text-stone-300">{t.create.yourName}</span>
           <span className="text-xs text-stone-500">
             {senderName.length}/{NAME_MAX}
           </span>
@@ -146,14 +164,14 @@ export default function Create() {
           value={senderName}
           maxLength={NAME_MAX}
           onChange={(e) => setSenderName(e.target.value)}
-          placeholder="From…"
+          placeholder={t.create.fromPlaceholder}
           className={inputClass}
         />
       </label>
 
       <label className="block">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-stone-300">Their name</span>
+          <span className="text-sm font-medium text-stone-300">{t.create.theirName}</span>
           <span className="text-xs text-stone-500">
             {recipientName.length}/{NAME_MAX}
           </span>
@@ -163,14 +181,14 @@ export default function Create() {
           value={recipientName}
           maxLength={NAME_MAX}
           onChange={(e) => setRecipientName(e.target.value)}
-          placeholder="To…"
+          placeholder={t.create.toPlaceholder}
           className={inputClass}
         />
       </label>
 
       <label className="block">
         <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-stone-300">Message</span>
+          <span className="text-sm font-medium text-stone-300">{t.create.message}</span>
           <span className="text-xs text-stone-500">
             {message.length}/{MESSAGE_MAX}
           </span>
@@ -180,7 +198,7 @@ export default function Create() {
           maxLength={MESSAGE_MAX}
           rows={4}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Write something they'll remember…"
+          placeholder={t.create.messagePlaceholder}
           className={`${inputClass} resize-none`}
         />
       </label>
@@ -193,7 +211,7 @@ export default function Create() {
         onClick={() => void handleCreate()}
         className="min-h-[52px] w-full rounded-full bg-rose-500 text-lg font-medium text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        {submitting ? "Creating…" : "Create gift"}
+        {submitting ? t.create.creating : t.create.submit}
       </button>
     </main>
   );

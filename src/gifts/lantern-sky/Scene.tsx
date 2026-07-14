@@ -269,7 +269,7 @@ interface TagInfo {
   h: number;
 }
 
-export default function LanternSkyScene({ variants, phase, recipientName, message, onOpenComplete }: SceneProps) {
+export default function LanternSkyScene({ variants, phase, recipientName, message, lang, onOpenComplete }: SceneProps) {
   const palette = PALETTES[variants.color] ?? PALETTES.amber;
 
   const { units, wordStart } = useMemo(
@@ -294,6 +294,7 @@ export default function LanternSkyScene({ variants, phase, recipientName, messag
           glowColor: "#ffdca6",
           lineHeight: 1.0,
           padding: 16,
+          lang,
         });
         cache.set(u, t);
       }
@@ -307,7 +308,7 @@ export default function LanternSkyScene({ variants, phase, recipientName, messag
       return { texture: t.texture, w, h };
     });
     return { list, textures: [...cache.values()] };
-  }, [units]);
+  }, [units, lang]);
   useEffect(() => {
     const captured = tagData.textures;
     return () => captured.forEach((t) => t.texture.dispose());

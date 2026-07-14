@@ -4,6 +4,44 @@
   --font-display: "Georgia", "Times New Roman", serif;
 }
 
+/* Thmanyah Sans — used for all Arabic UI + rasterized 3D text. Vite bundles and
+   hashes the woff2 files from the repo-root fonts/ dir. */
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("../fonts/thmanyahsans-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("../fonts/thmanyahsans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("../fonts/thmanyahsans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("../fonts/thmanyahsans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("../fonts/thmanyahsans-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 html,
 body,
 #root {
@@ -13,4 +51,11 @@ body,
 body {
   @apply bg-[#100b14] text-stone-200 antialiased;
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* Any subtree marked lang="ar" (pages set it on their root) renders in Thmanyah.
+   The .font-serif rule beats Tailwind's serif utility on headings. */
+:lang(ar),
+:lang(ar) .font-serif {
+  font-family: "Thmanyah Sans", system-ui, sans-serif;
 }

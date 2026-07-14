@@ -19,6 +19,7 @@ export const createGift = mutation({
     recipientName: v.string(),
     message: v.string(),
     variants: v.record(v.string(), v.string()),
+    lang: v.union(v.literal("en"), v.literal("ar")),
   },
   handler: async (ctx, args) => {
     const def = catalog[args.giftType];
@@ -60,6 +61,7 @@ export const createGift = mutation({
       recipientName,
       message,
       variants: args.variants,
+      lang: args.lang,
       slug,
       statusKey,
     });
@@ -83,6 +85,7 @@ export const getGift = query({
       recipientName: gift.recipientName,
       message: gift.message,
       variants: gift.variants,
+      lang: gift.lang ?? "en",
       openedAt: gift.openedAt ?? null,
     };
   },

@@ -6,6 +6,7 @@ import type { SceneProps } from "../types";
 import { useOpeningClock } from "../useOpeningClock";
 import { makeRadialSprite } from "../sprites";
 import { makeTextTexture } from "../text3d";
+import { forRecipient } from "../../i18n";
 
 /* ---------- deterministic pseudo-random (stable across renders) ---------- */
 function mulberry32(seed: number) {
@@ -238,7 +239,7 @@ function buildMats(pal: ScenePalette): SceneMats {
   return { matA, matB, matSnow };
 }
 
-export default function SnowGlobeScene({ variants, phase, recipientName, message, onOpenComplete }: SceneProps) {
+export default function SnowGlobeScene({ variants, phase, recipientName, message, lang, onOpenComplete }: SceneProps) {
   const sceneKind = variants.scene in SCENE_PALETTES ? variants.scene : "cabin";
   const pal = SCENE_PALETTES[sceneKind];
   const pconf = PARTICLE_CONFS[variants.particles] ?? PARTICLE_CONFS.snow;
@@ -277,7 +278,12 @@ export default function SnowGlobeScene({ variants, phase, recipientName, message
 
   const plaque = useMemo(() => {
     const text =
-      message.trim() || (recipientName.trim() ? `For ${recipientName.trim()}` : "A little world, for you");
+      message.trim() ||
+      (recipientName.trim()
+        ? forRecipient(lang, recipientName)
+        : lang === "ar"
+          ? "عالمٌ صغير، لك"
+          : "A little world, for you");
     return makeTextTexture(text, {
       fontSize: 46,
       fontWeight: "600",
@@ -286,8 +292,9 @@ export default function SnowGlobeScene({ variants, phase, recipientName, message
       maxWidthPx: 680,
       lineHeight: 1.28,
       padding: 24,
+      lang,
     });
-  }, [message, recipientName]);
+  }, [message, recipientName, lang]);
   useEffect(() => {
     return () => {
       plaque.texture.dispose();
