@@ -16,6 +16,7 @@ const scenes = {
   "message-bottle": lazy(() => import("./message-bottle/Scene")),
   "music-box": lazy(() => import("./music-box/Scene")),
   "golden-locket": lazy(() => import("./golden-locket/Scene")),
+  "shooting-gallery": lazy(() => import("./shooting-gallery/Scene")),
   aurora: lazy(() => import("./aurora/Scene")),
 } as const;
 

@@ -280,6 +280,25 @@ export const catalog: Record<string, GiftCatalogEntry> = {
       },
     ],
   },
+  "shooting-gallery": {
+    id: "shooting-gallery",
+    name: "Shooting Gallery",
+    nameAr: "كشك الرماية",
+    tagline: "One shot, and the doll gives up its secret",
+    taglineAr: "طلقة واحدة، وتبوح الدمية بسرّها",
+    variants: [
+      {
+        key: "mood",
+        label: "Mood",
+        labelAr: "الأجواء",
+        options: opts(
+          ["noir", "Noir", "نوار"],
+          ["bloodmoon", "Blood Moon", "قمر الدم"],
+          ["absinthe", "Absinthe", "أفسنتين"],
+        ),
+      },
+    ],
+  },
   aurora: {
     id: "aurora",
     name: "Aurora",
