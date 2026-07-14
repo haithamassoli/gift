@@ -6,21 +6,8 @@ import type { SceneProps } from "../types";
 import { makeRadialSprite } from "../sprites";
 import { makeTextTexture } from "../text3d";
 import { forRecipient } from "../../i18n";
-
-/* ---------- deterministic pseudo-random (stable across renders) ---------- */
-function mulberry32(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const easeOutCubic = (x: number) => 1 - Math.pow(1 - x, 3);
+import { useOpeningClock } from "../useOpeningClock";
+import { clamp01, easeOutCubic, mulberry32 } from "../math";
 
 /* ---------- opening timeline (seconds) ---------- */
 const IGNITE_START = 0.6; // first anchor lights
@@ -314,15 +301,7 @@ export default function ConstellationScene({
   const shootLen = useRef(5);
   const shootAng = useRef(0);
 
-  /* opening clock (local refs so lint allows mutation; reset when opening starts) */
-  const tRef = useRef(0);
-  const doneRef = useRef(false);
-  useEffect(() => {
-    if (phase === "opening") {
-      tRef.current = 0;
-      doneRef.current = false;
-    }
-  }, [phase]);
+  const { t: tRef, done: doneRef } = useOpeningClock(phase);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);

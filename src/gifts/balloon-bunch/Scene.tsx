@@ -5,26 +5,7 @@ import * as THREE from "three";
 import type { SceneProps } from "../types";
 import { makeTextTexture } from "../text3d";
 import { useOpeningClock } from "../useOpeningClock";
-
-/* ---------- deterministic pseudo-random (stable across renders) ---------- */
-function mulberry32(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const smooth = (x: number) => x * x * (3 - 2 * x);
-const easeOutCubic = (x: number) => 1 - Math.pow(1 - x, 3);
-const C1 = 1.70158;
-const C3 = C1 + 1;
-// Springy overshoot: 0 at x=0, peaks ~1.09 near the end, settles to 1 at x=1.
-const easeOutBack = (x: number) => 1 + C3 * Math.pow(x - 1, 3) + C1 * Math.pow(x - 1, 2);
+import { clamp01, easeOutBack, easeOutCubic, mulberry32, smooth } from "../math";
 
 /* ---------- palettes (keyed by the `palette` variant value) ---------- */
 interface Palette {

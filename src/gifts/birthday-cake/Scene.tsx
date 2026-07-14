@@ -5,22 +5,7 @@ import * as THREE from "three";
 import type { SceneProps } from "../types";
 import { makeRadialSprite } from "../sprites";
 import { makeTextTexture } from "../text3d";
-
-/* ---------- deterministic pseudo-random (stable across renders) ---------- */
-function mulberry32(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const smooth = (x: number) => x * x * (3 - 2 * x);
-const easeOutCubic = (x: number) => 1 - Math.pow(1 - x, 3);
+import { clamp01, easeOutCubic, mulberry32, smooth } from "../math";
 
 /* ---------- palettes (keyed by frosting value) ---------- */
 const PALETTES: Record<string, { frosting: string; sponge: string; drip: string; plate: string }> = {

@@ -1,10 +1,10 @@
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { GiftCanvas } from "../components/GiftCanvas";
 import { registry } from "../gifts/registry";
-import { MESSAGE_MAX, NAME_MAX, pick } from "../gifts/catalog";
+import { MESSAGE_MAX, NAME_MAX, pick, defaultVariants } from "../gifts/catalog";
 import { useArabicFontReady } from "../gifts/useArabicFontReady";
 import { useLang, LangToggle } from "../i18n";
 import NotFound from "./NotFound";
@@ -23,11 +23,7 @@ export default function Create() {
   const fontReady = useArabicFontReady(lang === "ar");
 
   const [variants, setVariants] = useState<Record<string, string>>(() =>
-    def
-      ? Object.fromEntries(
-          def.variants.map((variant) => [variant.key, variant.options[0].value] as const),
-        )
-      : {},
+    def ? defaultVariants(def) : {},
   );
   const [senderName, setSenderName] = useState("");
   const [recipientName, setRecipientName] = useState("");
@@ -82,18 +78,16 @@ export default function Create() {
           {t.create.livePreview}
         </span>
         <GiftCanvas>
-          <Suspense fallback={null}>
-            {(lang === "en" || fontReady) && (
-              <def.Scene
-                variants={variants}
-                phase="preview"
-                senderName={senderName}
-                recipientName={recipientName}
-                message={message}
-                lang={lang}
-              />
-            )}
-          </Suspense>
+          {(lang === "en" || fontReady) && (
+            <def.Scene
+              variants={variants}
+              phase="preview"
+              senderName={senderName}
+              recipientName={recipientName}
+              message={message}
+              lang={lang}
+            />
+          )}
         </GiftCanvas>
       </div>
 

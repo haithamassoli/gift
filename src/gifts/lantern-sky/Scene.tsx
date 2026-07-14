@@ -6,22 +6,7 @@ import type { SceneProps } from "../types";
 import { useOpeningClock } from "../useOpeningClock";
 import { makeTextTexture, type TextTexture } from "../text3d";
 import { makeRadialSprite } from "../sprites";
-
-/* ---------- deterministic pseudo-random (stable across renders) ---------- */
-function mulberry32(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const smooth = (x: number) => x * x * (3 - 2 * x);
-const easeInOut = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+import { clamp01, easeInOut, mulberry32, smooth } from "../math";
 
 /* ---------- palettes (keyed on the `color` variant value) ---------- */
 interface Palette {

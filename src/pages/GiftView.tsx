@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -70,7 +70,7 @@ export default function GiftView() {
   const reducedMotion = usePrefersReducedMotion();
   // The recipient always sees the gift in the language the sender chose, not
   // their own toggle. Default to "en" until the gift loads (keeps hook order stable).
-  const lang = gift ? gift.lang ?? "en" : "en";
+  const lang = gift?.lang ?? "en";
   const fontReady = useArabicFontReady(lang === "ar");
 
   if (gift === undefined) {
@@ -115,19 +115,17 @@ export default function GiftView() {
         {/* R3F's wrapper uses height:100%, which needs a definite height — inset-0 gives it one. */}
         <div className="absolute inset-0">
         <GiftCanvas>
-          <Suspense fallback={null}>
-            {(lang === "en" || fontReady) && (
-              <def.Scene
-                variants={gift.variants}
-                phase={phase}
-                senderName={gift.senderName}
-                recipientName={gift.recipientName}
-                message={gift.message}
-                lang={lang}
-                onOpenComplete={() => setPhase("revealed")}
-              />
-            )}
-          </Suspense>
+          {(lang === "en" || fontReady) && (
+            <def.Scene
+              variants={gift.variants}
+              phase={phase}
+              senderName={gift.senderName}
+              recipientName={gift.recipientName}
+              message={gift.message}
+              lang={lang}
+              onOpenComplete={() => setPhase("revealed")}
+            />
+          )}
         </GiftCanvas>
         </div>
 

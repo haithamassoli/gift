@@ -86,7 +86,6 @@ export const getGift = query({
       message: gift.message,
       variants: gift.variants,
       lang: gift.lang ?? "en",
-      openedAt: gift.openedAt ?? null,
     };
   },
 });
@@ -116,8 +115,6 @@ export const getStatus = query({
     if (!gift) return null;
     return {
       slug: gift.slug,
-      giftType: gift.giftType,
-      recipientName: gift.recipientName,
       openedAt: gift.openedAt ?? null,
     };
   },

@@ -1,6 +1,6 @@
 // Pure data — imported by both the client and Convex functions (no React here).
 
-export interface VariantDef {
+interface VariantDef {
   key: string;
   label: string;
   labelAr?: string;
@@ -26,6 +26,10 @@ export const pick = (lang: "en" | "ar", en: string, ar?: string) =>
 
 const opts = (...triples: [string, string, string?][]) =>
   triples.map(([value, label, labelAr]) => ({ value, label, labelAr }));
+
+/** First option value for each variant key — the neutral default selection. */
+export const defaultVariants = (def: GiftCatalogEntry): Record<string, string> =>
+  Object.fromEntries(def.variants.map((v) => [v.key, v.options[0].value]));
 
 export const catalog: Record<string, GiftCatalogEntry> = {
   "eternal-rose": {

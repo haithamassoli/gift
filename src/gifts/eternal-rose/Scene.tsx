@@ -3,22 +3,9 @@ import { useFrame } from "@react-three/fiber";
 import { PerspectiveCamera } from "@react-three/drei";
 import * as THREE from "three";
 import type { SceneProps } from "../types";
-
-/* ---------- deterministic pseudo-random (stable across renders) ---------- */
-function mulberry32(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
-const smooth = (x: number) => x * x * (3 - 2 * x);
-const easeOutCubic = (x: number) => 1 - Math.pow(1 - x, 3);
+import { makeRadialSprite } from "../sprites";
+import { useOpeningClock } from "../useOpeningClock";
+import { clamp01, easeOutCubic, mulberry32, smooth } from "../math";
 
 /* ---------- palettes ---------- */
 const PALETTES: Record<
@@ -94,6 +81,7 @@ interface Petal {
   start: number; // bloom start time (s into the opening timeline)
 }
 
+const BLOOM_DUR = 1.1; // seconds for one petal to bloom closed→open
 function buildPetals(): { petals: Petal[]; end: number } {
   const rand = mulberry32(20260713);
   const petals: Petal[] = [];
@@ -113,13 +101,11 @@ function buildPetals(): { petals: Petal[]; end: number } {
       });
     }
   }
-  const BLOOM_DUR = 1.1;
   const end = Math.max(...petals.map((p) => p.start)) + BLOOM_DUR + 0.4;
   return { petals, end };
 }
 
 const { petals: PETALS, end: OPEN_END } = buildPetals();
-const BLOOM_DUR = 1.1;
 
 /* ---------- light motes ---------- */
 const MOTE_COUNT = 110;
@@ -147,21 +133,7 @@ function buildMotes() {
 const DOME_BASE_Y = -1.5;
 
 // Round sprite for the mote particles (PointsMaterial renders squares without a map).
-function buildMoteTexture(): THREE.Texture {
-  const size = 32;
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = size;
-  const g = canvas.getContext("2d")!;
-  const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  grad.addColorStop(0, "rgba(255,255,255,1)");
-  grad.addColorStop(0.4, "rgba(255,255,255,0.6)");
-  grad.addColorStop(1, "rgba(255,255,255,0)");
-  g.fillStyle = grad;
-  g.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(canvas);
-  return tex;
-}
-const moteTexture = buildMoteTexture();
+const moteTexture = makeRadialSprite();
 
 export default function EternalRoseScene({ variants, phase, onOpenComplete }: SceneProps) {
   const palette = PALETTES[variants.petal] ?? PALETTES.red;
@@ -208,15 +180,7 @@ export default function EternalRoseScene({ variants, phase, onOpenComplete }: Sc
   const moteMatRef = useRef<THREE.PointsMaterial>(null);
   const petalRefs = useRef<(THREE.Group | null)[]>([]);
 
-  const tRef = useRef(0);
-  const completeRef = useRef(false);
-
-  useEffect(() => {
-    if (phase === "opening") {
-      tRef.current = 0;
-      completeRef.current = false;
-    }
-  }, [phase]);
+  const { t: tRef, done: completeRef } = useOpeningClock(phase);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.05);

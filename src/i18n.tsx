@@ -118,7 +118,6 @@ export function forRecipient(lang: Lang, name: string): string {
 const STORAGE_KEY = "gift.lang";
 
 function initialLang(): Lang {
-  if (typeof window === "undefined") return "en";
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved === "en" || saved === "ar") return saved;
   return navigator.language?.toLowerCase().startsWith("ar") ? "ar" : "en";

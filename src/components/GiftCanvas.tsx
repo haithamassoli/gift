@@ -1,14 +1,39 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+
+// Shared visibility store: one "visibilitychange" listener fans out to every
+// canvas, instead of each gallery canvas registering its own.
+const visSubscribers = new Set<() => void>();
+document.addEventListener("visibilitychange", () =>
+  visSubscribers.forEach((fn) => fn()),
+);
+function useDocumentHidden(): boolean {
+  return useSyncExternalStore(
+    (onChange) => {
+      visSubscribers.add(onChange);
+      return () => {
+        visSubscribers.delete(onChange);
+      };
+    },
+    () => document.hidden,
+  );
+}
 
 // Reduced motion: run a short burst of frames so the scene settles into its
 // static pose (scenes apply phase transforms in useFrame), then stop the loop.
-function SettleAndStop({ frames = 40 }: { frames?: number }) {
+function SettleAndStop() {
   const invalidate = useThree((s) => s.invalidate);
   const count = useRef(0);
   useFrame(() => {
-    if (count.current < frames) {
+    if (count.current < 40) {
       count.current += 1;
       invalidate();
     }
@@ -24,13 +49,7 @@ export function GiftCanvas({ children }: { children: ReactNode }) {
   const reduced = usePrefersReducedMotion();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(true);
-  const [hidden, setHidden] = useState(() => document.hidden);
-
-  useEffect(() => {
-    const onVis = () => setHidden(document.hidden);
-    document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
-  }, []);
+  const hidden = useDocumentHidden();
 
   useEffect(() => {
     const el = wrapRef.current;

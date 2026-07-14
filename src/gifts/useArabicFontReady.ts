@@ -9,7 +9,7 @@ const WEIGHTS = ["400", "500", "700", "900"];
 
 export function useArabicFontReady(active: boolean): boolean {
   const [ready, setReady] = useState(
-    () => !active || (typeof document !== "undefined" && document.fonts.check('700 1em "Thmanyah Sans"')),
+    () => !active || document.fonts.check('700 1em "Thmanyah Sans"'),
   );
 
   useEffect(() => {

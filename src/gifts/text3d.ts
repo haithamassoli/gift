@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import type { Lang } from "../i18n";
+import { mulberry32 } from "./math";
 
 // Arabic rasterizes in Thmanyah with rtl bidi; everything else keeps its Latin
 // font. Centralized here so scenes only pass `lang`.
@@ -9,17 +10,6 @@ const AR_FONT = "'Thmanyah Sans', system-ui, sans-serif";
 // offscreen 2D canvas, then either sample opaque pixels as particle targets
 // (fireworks, butterflies, lanterns…) or hand back a crisp CanvasTexture
 // (locket engraving, plaques, in-scene glowing messages).
-
-function mulberry32(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidthPx: number): string[] {
   const lines: string[] = [];
@@ -39,7 +29,7 @@ function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidthPx: numb
   return lines.length ? lines : [""];
 }
 
-export interface TextPointsOptions {
+interface TextPointsOptions {
   /** Max sampled points (default 600). */
   maxPoints?: number;
   /** Font size in canvas px (default 90) — bigger = smoother outlines. */
@@ -135,7 +125,7 @@ export function sampleTextPoints(text: string, opts: TextPointsOptions = {}): Te
   return { points, count, aspect: height / width };
 }
 
-export interface TextTextureOptions {
+interface TextTextureOptions {
   fontSize?: number;
   fontFamily?: string;
   fontWeight?: string;

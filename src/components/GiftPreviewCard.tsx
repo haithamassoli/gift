@@ -1,8 +1,8 @@
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { GiftCanvas } from "./GiftCanvas";
 import type { GiftDef } from "../gifts/types";
-import { pick } from "../gifts/catalog";
+import { pick, defaultVariants } from "../gifts/catalog";
 import type { Lang } from "../i18n";
 
 // Mounts a live scene only while the element is scrolled into view, so an
@@ -29,11 +29,7 @@ export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
   const [ref, inView] = useInView<HTMLDivElement>();
 
   // First option value for each variant key — a neutral default preview.
-  const variants = useMemo<Record<string, string>>(
-    () =>
-      Object.fromEntries(def.variants.map((v) => [v.key, v.options[0].value])),
-    [def.variants],
-  );
+  const variants = defaultVariants(def);
 
   return (
     <Link
@@ -47,16 +43,14 @@ export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
         {inView && (
           <div className="absolute inset-0">
             <GiftCanvas>
-              <Suspense fallback={null}>
-                <def.Scene
-                  variants={variants}
-                  phase="preview"
-                  senderName={pick(lang, "You", "أنت")}
-                  recipientName={pick(lang, "Someone", "شخص ما")}
-                  message=""
-                  lang={lang}
-                />
-              </Suspense>
+              <def.Scene
+                variants={variants}
+                phase="preview"
+                senderName={pick(lang, "You", "أنت")}
+                recipientName={pick(lang, "Someone", "شخص ما")}
+                message=""
+                lang={lang}
+              />
             </GiftCanvas>
           </div>
         )}
