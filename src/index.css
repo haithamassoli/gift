@@ -2,6 +2,51 @@
 
 @theme {
   --font-display: "Georgia", "Times New Roman", serif;
+
+  /* Loading. The float and the halo share a 6s period so the mark and its light
+     breathe as one; the motes run on their own clock and stagger into a stream. */
+  --animate-mark-float: mark-float 6s ease-in-out infinite;
+  --animate-halo-breathe: halo-breathe 6s ease-in-out infinite;
+  --animate-mote-gather: mote-gather 5.2s ease-in infinite;
+
+  @keyframes mark-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  @keyframes halo-breathe {
+    0%,
+    100% {
+      opacity: 0.45;
+      transform: scale(0.92);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1.06);
+    }
+  }
+
+  /* --mx/--my are the mote's starting offset, set per-mote inline. Only read here,
+     never animated, so no @property registration is needed. */
+  @keyframes mote-gather {
+    0% {
+      transform: translate(var(--mx), var(--my)) scale(1);
+      opacity: 0;
+    }
+    15%,
+    70% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate(0, 0) scale(0.4);
+      opacity: 0;
+    }
+  }
 }
 
 /* Thmanyah Sans — used for all Arabic UI + rasterized 3D text. Vite bundles and

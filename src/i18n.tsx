@@ -12,6 +12,10 @@ import {
 export type Lang = "en" | "ar";
 
 const en = {
+  common: {
+    // Announced by the loading screen's role="status"; never shown on screen.
+    loading: "Loading",
+  },
   home: {
     title: "Gift",
     subtitle: "Beautiful 3D gifts you send as a link. Free, no accounts.",
@@ -61,6 +65,9 @@ type Strings = typeof en;
 
 // Typed against `en`, so a missing or misnamed key fails the build.
 const ar: Strings = {
+  common: {
+    loading: "جارٍ التحميل",
+  },
   home: {
     title: "هدية",
     subtitle: "هدايا ثلاثية الأبعاد تُرسلها برابط. مجانًا، دون حسابات.",
