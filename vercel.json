@@ -1,3 +1,16 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/g/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|Facebot|WhatsApp|Twitterbot|TelegramBot|Slackbot|Discordbot|LinkedInBot|Applebot|Pinterestbot|redditbot|SkypeUriPreview|Googlebot|bingbot).*"
+        }
+      ],
+      "destination": "https://enchanted-cardinal-983.eu-west-1.convex.site/g/:slug"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

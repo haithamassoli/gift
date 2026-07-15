@@ -6,6 +6,8 @@ import Loading from "../components/Loading";
 import { useLang } from "../i18n";
 import NotFound from "./NotFound";
 
+const canShare = "share" in navigator;
+
 export default function Sent() {
   const { statusKey } = useParams();
   const status = useQuery(
@@ -53,10 +55,28 @@ export default function Sent() {
           {shareUrl}
         </div>
 
+        {canShare ? (
+          <button
+            type="button"
+            onClick={() =>
+              void navigator
+                .share({ url: shareUrl, text: t.sent.shareText })
+                .catch(() => {})
+            }
+            className="min-h-[48px] rounded-full bg-rose-500 px-6 font-medium text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+          >
+            {t.sent.share}
+          </button>
+        ) : null}
+
         <button
           type="button"
           onClick={copy}
-          className="min-h-[48px] rounded-full bg-rose-500 px-6 font-medium text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+          className={
+            canShare
+              ? "min-h-[48px] rounded-full border border-white/15 px-6 font-medium text-stone-300 transition hover:border-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+              : "min-h-[48px] rounded-full bg-rose-500 px-6 font-medium text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+          }
         >
           {copied ? t.sent.copied : t.sent.copy}
         </button>

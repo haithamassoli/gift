@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -28,31 +28,22 @@ function formatCountdown(ms: number, lang: Lang): string {
 }
 
 // Ticks once a second in isolation so the countdown re-renders without touching
-// the canvas; calls onUnlock (idempotent) the moment the clock reaches openAfter.
+// the canvas.
 function LockedSeal({
   openAfter,
   lang,
   opensOnLabel,
-  onUnlock,
 }: {
   openAfter: number;
   lang: Lang;
   opensOnLabel: (date: string) => string;
-  onUnlock: () => void;
 }) {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (Date.now() >= openAfter) {
-      onUnlock();
-      return;
-    }
-    const id = setInterval(() => {
-      if (Date.now() >= openAfter) onUnlock();
-      else setNow(Date.now());
-    }, 1000);
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
-  }, [openAfter, onUnlock]);
+  }, []);
 
   const dateLabel = useMemo(
     () =>
@@ -80,6 +71,7 @@ function LockedSeal({
 function RevealedMessage({
   message,
   senderName,
+  voiceUrl,
   payload,
   openLinkLabel,
   photoAlt,
@@ -89,6 +81,7 @@ function RevealedMessage({
 }: {
   message: string;
   senderName: string;
+  voiceUrl: string | null;
   payload: string | null;
   openLinkLabel: string;
   photoAlt: string;
@@ -112,6 +105,9 @@ function RevealedMessage({
         {message}
       </p>
       <p className="mt-4 text-stone-400">— {senderName}</p>
+      {voiceUrl ? (
+        <audio controls src={voiceUrl} className="mt-6 w-full" />
+      ) : null}
       {payload ? (
         IMAGE_RE.test(payload) ? (
           <img
@@ -155,12 +151,6 @@ export default function GiftView() {
   const gift = useQuery(api.gifts.getGift, slug ? { slug } : "skip");
   const markOpened = useMutation(api.gifts.markOpened);
   const [phase, setPhase] = useState<Phase>("sealed");
-  // Captured once at mount — deriving `locked` from a fresh Date.now() during
-  // render is impure; the lock only ever flips locked→unlocked, so a mount
-  // snapshot plus LockedSeal's own timer is enough.
-  const [mountNow] = useState(() => Date.now());
-  const [unlockedNow, setUnlockedNow] = useState(false);
-  const unlock = useCallback(() => setUnlockedNow(true), []);
   const reducedMotion = usePrefersReducedMotion();
   // The recipient always sees the gift in the language the sender chose, not
   // their own toggle. Default to "en" until the gift loads (keeps hook order stable).
@@ -190,7 +180,7 @@ export default function GiftView() {
           {t.gift.forName(gift.recipientName)}
         </h1>
         <p className="whitespace-pre-wrap select-text text-lg leading-relaxed text-stone-200">
-          {gift.message}
+          {gift.message ?? ""}
         </p>
         <p className="text-stone-400">— {gift.senderName}</p>
       </main>
@@ -203,9 +193,8 @@ export default function GiftView() {
     if (slug) void markOpened({ slug });
   };
 
-  // Presentational lock: sealed and un-unwrappable until the sender's chosen time.
-  const locked =
-    gift.openAfter != null && !unlockedNow && mountNow < gift.openAfter;
+  // Presentational lock derived from server truth: sealed hides the message.
+  const locked = gift.openAfter != null && gift.message === null;
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} lang={lang} className="flex min-h-dvh flex-col">
@@ -219,7 +208,7 @@ export default function GiftView() {
               phase={phase}
               senderName={gift.senderName}
               recipientName={gift.recipientName}
-              message={gift.message}
+              message={gift.message ?? ""}
               lang={lang}
               onOpenComplete={() => setPhase("revealed")}
             />
@@ -240,7 +229,6 @@ export default function GiftView() {
                 openAfter={gift.openAfter}
                 lang={lang}
                 opensOnLabel={t.gift.opensOn}
-                onUnlock={unlock}
               />
             ) : (
               <button
@@ -257,8 +245,9 @@ export default function GiftView() {
 
       {phase === "revealed" && (
         <RevealedMessage
-          message={gift.message}
+          message={gift.message ?? ""}
           senderName={gift.senderName}
+          voiceUrl={gift.voiceUrl}
           payload={gift.payload}
           openLinkLabel={t.gift.openLink}
           photoAlt={t.gift.photoAlt}

@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 import { GiftCanvas } from "../components/GiftCanvas";
+import { VoiceRecorder } from "../components/VoiceRecorder";
 import { registry } from "../gifts/registry";
 import { MESSAGE_MAX, NAME_MAX, PAYLOAD_MAX, pick, defaultVariants } from "../gifts/catalog";
 import { useArabicFontReady } from "../gifts/useArabicFontReady";
@@ -20,6 +22,7 @@ export default function Create() {
   const { giftType } = useParams();
   const def = giftType ? registry[giftType] : undefined;
   const createGift = useMutation(api.gifts.createGift);
+  const generateVoiceUploadUrl = useMutation(api.gifts.generateVoiceUploadUrl);
   const navigate = useNavigate();
   const { lang, t } = useLang();
   const rtl = lang === "ar";
@@ -33,6 +36,8 @@ export default function Create() {
   const [recipientName, setRecipientName] = useState("");
   const [message, setMessage] = useState("");
   const [payload, setPayload] = useState("");
+  const [notifyEmail, setNotifyEmail] = useState("");
+  const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
   const [scheduled, setScheduled] = useState(false);
   const [openAfterLocal, setOpenAfterLocal] = useState("");
   const [minLocal] = useState(() => toLocalInput(new Date(Date.now() + 60_000)));
@@ -55,6 +60,18 @@ export default function Create() {
     try {
       const openAfterMs =
         scheduled && openAfterLocal ? new Date(openAfterLocal).getTime() : NaN;
+      let voiceId: Id<"_storage"> | undefined;
+      if (voiceBlob) {
+        const url = await generateVoiceUploadUrl();
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": voiceBlob.type },
+          body: voiceBlob,
+        });
+        if (!res.ok) throw new Error("Voice upload failed");
+        const { storageId } = await res.json();
+        voiceId = storageId;
+      }
       const { statusKey } = await createGift({
         giftType: def.id,
         senderName: senderName.trim(),
@@ -64,6 +81,8 @@ export default function Create() {
         lang,
         openAfter: Number.isNaN(openAfterMs) ? undefined : openAfterMs,
         payload: payload.trim() || undefined,
+        notifyEmail: notifyEmail.trim() || undefined,
+        voiceId,
       });
       navigate(`/sent/${statusKey}`);
     } catch {
@@ -227,6 +246,8 @@ export default function Create() {
         />
       </label>
 
+      <VoiceRecorder onChange={setVoiceBlob} />
+
       <div className="flex flex-col gap-3">
         <label className="flex items-center gap-3 text-sm font-medium text-stone-300">
           <input
@@ -259,6 +280,20 @@ export default function Create() {
           </>
         ) : null}
       </div>
+
+      <label className="block">
+        <span className="mb-2 block text-sm font-medium text-stone-300">
+          {t.create.notifyLabel}
+        </span>
+        <input
+          type="email"
+          inputMode="email"
+          value={notifyEmail}
+          onChange={(e) => setNotifyEmail(e.target.value)}
+          className={inputClass}
+        />
+        <p className="mt-2 text-xs text-stone-500">{t.create.notifyHint}</p>
+      </label>
 
       {error && <p className="text-sm text-rose-400">{error}</p>}
 

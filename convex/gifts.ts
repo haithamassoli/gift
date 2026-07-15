@@ -1,14 +1,18 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
+import { internal } from "./_generated/api";
 import {
   catalog,
   MESSAGE_MAX,
   NAME_MAX,
   PAYLOAD_MAX,
+  VOICE_MAX_BYTES,
   isSafePayloadUrl,
 } from "../src/gifts/catalog";
 
 const SLUG_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function randomId(length: number): string {
   const bytes = new Uint8Array(length);
@@ -28,6 +32,8 @@ export const createGift = mutation({
     lang: v.union(v.literal("en"), v.literal("ar")),
     openAfter: v.optional(v.number()),
     payload: v.optional(v.string()),
+    notifyEmail: v.optional(v.string()),
+    voiceId: v.optional(v.id("_storage")),
   },
   handler: async (ctx, args) => {
     const def = catalog[args.giftType];
@@ -49,6 +55,22 @@ export const createGift = mutation({
         throw new Error(`Link must be at most ${PAYLOAD_MAX} characters`);
       if (!isSafePayloadUrl(payload))
         throw new Error("Link must be a valid http(s) URL");
+    }
+
+    const notifyEmail = args.notifyEmail?.trim();
+    if (notifyEmail) {
+      if (notifyEmail.length > 254 || !EMAIL_RE.test(notifyEmail))
+        throw new Error("Enter a valid email address");
+    }
+
+    if (args.voiceId) {
+      const meta = await ctx.db.system.get(args.voiceId);
+      if (
+        !meta ||
+        !meta.contentType?.startsWith("audio/") ||
+        meta.size > VOICE_MAX_BYTES
+      )
+        throw new Error("Invalid voice recording");
     }
 
     const variantKeys = Object.keys(args.variants);
@@ -77,7 +99,7 @@ export const createGift = mutation({
         ? args.openAfter
         : undefined;
 
-    await ctx.db.insert("gifts", {
+    const id = await ctx.db.insert("gifts", {
       giftType: args.giftType,
       senderName,
       recipientName,
@@ -88,10 +110,31 @@ export const createGift = mutation({
       statusKey,
       ...(openAfter !== undefined ? { openAfter } : {}),
       ...(payload ? { payload } : {}),
+      ...(notifyEmail ? { notifyEmail } : {}),
+      ...(args.voiceId ? { voiceId: args.voiceId } : {}),
     });
+
+    if (openAfter !== undefined) {
+      await ctx.scheduler.runAt(openAfter, internal.gifts.unseal, { id });
+    }
 
     return { slug, statusKey };
   },
+});
+
+export const unseal = internalMutation({
+  args: { id: v.id("gifts") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, { unsealedAt: Date.now() });
+    return null;
+  },
+});
+
+// ponytail: unauthenticated upload URL, same trust level as createGift;
+// rate-limit if abused.
+export const generateVoiceUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => await ctx.storage.generateUploadUrl(),
 });
 
 export const getGift = query({
@@ -102,16 +145,22 @@ export const getGift = query({
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
     if (!gift) return null;
-    // Public fields only — never statusKey.
+    const sealed = gift.openAfter != null && gift.openAfter > Date.now();
+    // Public fields only — never statusKey or notifyEmail. While sealed, the
+    // message, payload, and voice are withheld server-side.
     return {
       giftType: gift.giftType,
       senderName: gift.senderName,
       recipientName: gift.recipientName,
-      message: gift.message,
+      message: sealed ? null : gift.message,
       variants: gift.variants,
       lang: gift.lang ?? "en",
       openAfter: gift.openAfter ?? null,
-      payload: gift.payload ?? null,
+      payload: sealed ? null : (gift.payload ?? null),
+      voiceUrl:
+        sealed || !gift.voiceId
+          ? null
+          : await ctx.storage.getUrl(gift.voiceId),
     };
   },
 });
@@ -126,6 +175,14 @@ export const markOpened = mutation({
     if (!gift) throw new Error("Gift not found");
     if (gift.openedAt === undefined) {
       await ctx.db.patch(gift._id, { openedAt: Date.now() });
+      if (gift.notifyEmail) {
+        await ctx.scheduler.runAfter(0, internal.email.sendOpened, {
+          email: gift.notifyEmail,
+          recipientName: gift.recipientName,
+          statusKey: gift.statusKey,
+          lang: gift.lang ?? "en",
+        });
+      }
     }
     return null;
   },

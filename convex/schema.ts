@@ -15,9 +15,9 @@ export default defineSchema({
     statusKey: v.string(),
     openedAt: v.optional(v.number()),
     // Epoch ms before which the gift stays sealed. Absent = openable immediately.
-    // ponytail: presentational gate — getGift still returns the message; the
-    // recipient can't see it in the UI early but could in the network response.
-    // Upgrade path if that matters: withhold message/variants server-side until now >= openAfter.
+    // The gate is now enforced server-side in getGift: while sealed, message and
+    // payload are withheld from the query response (openAfter itself stays public
+    // to drive the recipient countdown).
     openAfter: v.optional(v.number()),
     // Optional http(s) URL (photo / link / voucher) revealed after the gift
     // opens. ponytail: presentational gate like openAfter — getGift returns it,
@@ -25,6 +25,11 @@ export default defineSchema({
     // if that matters. Single URL only; add a type discriminator if raw-text
     // voucher codes are ever needed.
     payload: v.optional(v.string()),
+    // PII — getGift/getStatus must NEVER return it.
+    notifyEmail: v.optional(v.string()),
+    // Written by the unseal poke purely to invalidate getGift subscriptions at unlock.
+    unsealedAt: v.optional(v.number()),
+    voiceId: v.optional(v.id("_storage")),
   })
     .index("by_slug", ["slug"])
     .index("by_statusKey", ["statusKey"]),
