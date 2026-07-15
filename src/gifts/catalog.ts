@@ -299,6 +299,265 @@ export const catalog: Record<string, GiftCatalogEntry> = {
       },
     ],
   },
+  "magic-lamp": {
+    id: "magic-lamp",
+    name: "Magic Lamp",
+    nameAr: "المصباح السحري",
+    tagline: "Rub the brass, and the smoke writes your words",
+    taglineAr: "افرك النحاس، فيكتب الدخان كلماتك",
+    variants: [
+      {
+        key: "metal",
+        label: "Metal",
+        labelAr: "المعدن",
+        options: opts(
+          ["brass", "Brass", "نحاس"],
+          ["aged-silver", "Aged Silver", "فضة عتيقة"],
+          ["obsidian", "Obsidian", "سبج"],
+        ),
+      },
+      {
+        key: "smoke",
+        label: "Smoke",
+        labelAr: "الدخان",
+        options: opts(
+          ["turquoise", "Turquoise", "فيروزي"],
+          ["rose", "Rose", "وردي"],
+          ["gold-dust", "Gold Dust", "غبار ذهبي"],
+        ),
+      },
+    ],
+  },
+  "foggy-mirror": {
+    id: "foggy-mirror",
+    name: "Foggy Mirror",
+    nameAr: "مرآة الضباب",
+    tagline: "Breathe on the glass; a finger writes back",
+    taglineAr: "انفخ على الزجاج، فيكتب لك إصبع خفي",
+    variants: [
+      {
+        key: "setting",
+        label: "Setting",
+        labelAr: "المشهد",
+        options: opts(
+          ["rain-window", "Rain Window", "نافذة مطر"],
+          ["candlelight", "Candlelight", "ضوء الشموع"],
+          ["night-train", "Night Train", "قطار ليلي"],
+        ),
+      },
+    ],
+  },
+  astrolabe: {
+    id: "astrolabe",
+    name: "Astrolabe",
+    nameAr: "الأسطرلاب",
+    tagline: "Turn the rings until the stars agree",
+    taglineAr: "أدِر الحلقات حتى تتفق النجوم",
+    variants: [
+      {
+        key: "metal",
+        label: "Metal",
+        labelAr: "المعدن",
+        options: opts(
+          ["brass", "Brass", "نحاس"],
+          ["silver", "Silver", "فضة"],
+          ["night-steel", "Night Steel", "فولاذ ليلي"],
+        ),
+      },
+      {
+        key: "sky",
+        label: "Sky",
+        labelAr: "السماء",
+        options: opts(
+          ["dawn", "Dawn", "فجر"],
+          ["dusk", "Dusk", "غسق"],
+          ["night", "Night", "ليل"],
+        ),
+      },
+    ],
+  },
+  "scratch-card": {
+    id: "scratch-card",
+    name: "Scratch Card",
+    nameAr: "بطاقة الحظ",
+    tagline: "Scratch the gold — every card wins",
+    taglineAr: "اكشط الذهب، كل البطاقات رابحة",
+    variants: [
+      {
+        key: "foil",
+        label: "Foil",
+        labelAr: "القشرة",
+        options: opts(
+          ["gold", "Gold", "ذهبي"],
+          ["silver", "Silver", "فضي"],
+          ["rose", "Rose", "وردي"],
+        ),
+      },
+      {
+        key: "motif",
+        label: "Motif",
+        labelAr: "الزخرفة",
+        options: opts(
+          ["hearts", "Hearts", "قلوب"],
+          ["stars", "Stars", "نجوم"],
+          ["clovers", "Clovers", "نفل"],
+        ),
+      },
+    ],
+  },
+  "claw-machine": {
+    id: "claw-machine",
+    name: "Claw Machine",
+    nameAr: "لعبة المخلب",
+    tagline: "Rigged, for once, in their favor",
+    taglineAr: "مضبوطة، لمرة واحدة، لصالحهم",
+    variants: [
+      {
+        key: "plush",
+        label: "Plush",
+        labelAr: "الدمية",
+        options: opts(
+          ["bear", "Bear", "دب"],
+          ["bunny", "Bunny", "أرنب"],
+          ["star", "Star", "نجمة"],
+        ),
+      },
+      {
+        key: "cabinet",
+        label: "Cabinet",
+        labelAr: "الكشك",
+        options: opts(
+          ["bubblegum", "Bubblegum", "وردي فقاعي"],
+          ["midnight", "Midnight", "منتصف الليل"],
+          ["mint", "Mint", "نعناعي"],
+        ),
+      },
+    ],
+  },
+  pinata: {
+    id: "pinata",
+    name: "Piñata",
+    nameAr: "بينياتا",
+    tagline: "Tap until it rains sweets and secrets",
+    taglineAr: "انقرها حتى تمطر حلوى وأسرارًا",
+    variants: [
+      {
+        key: "shape",
+        label: "Shape",
+        labelAr: "الشكل",
+        options: opts(
+          ["star", "Star", "نجمة"],
+          ["heart", "Heart", "قلب"],
+          ["burro", "Little Burro", "مهر صغير"],
+        ),
+      },
+      {
+        key: "palette",
+        label: "Palette",
+        labelAr: "الألوان",
+        options: opts(
+          ["fiesta", "Fiesta", "مهرجان"],
+          ["pastel", "Pastel", "باستيل"],
+          ["sunset", "Sunset", "غروب"],
+        ),
+      },
+    ],
+  },
+  mixtape: {
+    id: "mixtape",
+    name: "Mixtape",
+    nameAr: "شريط الذكريات",
+    tagline: "Press play — the ribbon writes the rest",
+    taglineAr: "اضغط التشغيل، فيكتب الشريط الباقي",
+    variants: [
+      {
+        key: "shell",
+        label: "Shell",
+        labelAr: "الهيكل",
+        options: opts(
+          ["smoke", "Smoke", "دخاني"],
+          ["cherry", "Cherry", "كرزي"],
+          ["seafoam", "Seafoam", "زبد البحر"],
+        ),
+      },
+      {
+        key: "label",
+        label: "Label",
+        labelAr: "الملصق",
+        options: opts(
+          ["handwritten", "Handwritten", "بخط اليد"],
+          ["typed", "Typed", "مطبوع"],
+        ),
+      },
+    ],
+  },
+  matchbox: {
+    id: "matchbox",
+    name: "Matchbox World",
+    nameAr: "عالم في علبة كبريت",
+    tagline: "One match, and a tiny world wakes",
+    taglineAr: "عود واحد، فيستيقظ عالم صغير",
+    variants: [
+      {
+        key: "world",
+        label: "World",
+        labelAr: "العالم",
+        options: opts(
+          ["city-rooftops", "City Rooftops", "سطوح المدينة"],
+          ["desert-night", "Desert Night", "ليل الصحراء"],
+          ["harbor", "Harbor", "المرفأ"],
+        ),
+      },
+    ],
+  },
+  "koi-pond": {
+    id: "koi-pond",
+    name: "Koi Pond",
+    nameAr: "بركة الكوي",
+    tagline: "Feed the koi; they write it on the water",
+    taglineAr: "أطعم الأسماك، فتكتبها على الماء",
+    variants: [
+      {
+        key: "koi",
+        label: "Koi",
+        labelAr: "الكوي",
+        options: opts(
+          ["white-gold", "White Gold", "أبيض ذهبي"],
+          ["crimson", "Crimson", "قرمزي"],
+          ["black-pearl", "Black Pearl", "لؤلؤ أسود"],
+        ),
+      },
+      {
+        key: "time",
+        label: "Time",
+        labelAr: "الوقت",
+        options: opts(
+          ["dusk", "Dusk", "غسق"],
+          ["night", "Night", "ليل"],
+          ["dawn", "Dawn", "فجر"],
+        ),
+      },
+    ],
+  },
+  "cup-reading": {
+    id: "cup-reading",
+    name: "The Cup Reading",
+    nameAr: "قراءة الفنجان",
+    tagline: "Flip the cup; the grounds spell their fortune",
+    taglineAr: "اقلب الفنجان، فيكتب البُنّ بختهم",
+    variants: [
+      {
+        key: "pattern",
+        label: "Pattern",
+        labelAr: "النقش",
+        options: opts(
+          ["gilded", "Gilded", "مذهّب"],
+          ["cobalt", "Cobalt", "كوبالت"],
+          ["blossom", "Blossom", "مزهر"],
+        ),
+      },
+    ],
+  },
   aurora: {
     id: "aurora",
     name: "Aurora",

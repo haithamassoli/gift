@@ -17,6 +17,16 @@ const scenes = {
   "music-box": lazy(() => import("./music-box/Scene")),
   "golden-locket": lazy(() => import("./golden-locket/Scene")),
   "shooting-gallery": lazy(() => import("./shooting-gallery/Scene")),
+  "magic-lamp": lazy(() => import("./magic-lamp/Scene")),
+  "foggy-mirror": lazy(() => import("./foggy-mirror/Scene")),
+  astrolabe: lazy(() => import("./astrolabe/Scene")),
+  "scratch-card": lazy(() => import("./scratch-card/Scene")),
+  "claw-machine": lazy(() => import("./claw-machine/Scene")),
+  pinata: lazy(() => import("./pinata/Scene")),
+  mixtape: lazy(() => import("./mixtape/Scene")),
+  matchbox: lazy(() => import("./matchbox/Scene")),
+  "koi-pond": lazy(() => import("./koi-pond/Scene")),
+  "cup-reading": lazy(() => import("./cup-reading/Scene")),
   aurora: lazy(() => import("./aurora/Scene")),
 } as const;
 

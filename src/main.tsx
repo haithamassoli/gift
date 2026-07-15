@@ -16,6 +16,11 @@ const Home = lazy(() => import("./pages/Home"));
 const Create = lazy(() => import("./pages/Create"));
 const GiftView = lazy(() => import("./pages/GiftView"));
 
+// Dev-only scene harness. Vite folds import.meta.env.DEV to a literal `false` in
+// a build, so the ternary, the routes, the dynamic import and the whole Dev
+// chunk are dead code — none of it ships. Keep both guards.
+const Dev = import.meta.env.DEV ? lazy(() => import("./pages/Dev")) : null;
+
 const client = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
 
 // ponytail: react-router's <ScrollRestoration /> only works under a data router,
@@ -43,6 +48,12 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/create/:giftType" element={<Create />} />
               <Route path="/sent/:statusKey" element={<Sent />} />
               <Route path="/g/:slug" element={<GiftView />} />
+              {import.meta.env.DEV && Dev && (
+                <>
+                  <Route path="/dev" element={<Dev />} />
+                  <Route path="/dev/:giftType" element={<Dev />} />
+                </>
+              )}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

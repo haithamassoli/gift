@@ -52,6 +52,10 @@ export interface TextPoints {
   count: number;
   /** aspect = height / width of the rasterized text block. */
   aspect: number;
+  /** Lines the text wrapped to. */
+  lineCount: number;
+  /** Line-to-line spacing in the same units as `points`; the block is centered, so line i sits at ((lineCount-1)/2 - i) * lineSpacing. */
+  lineSpacing: number;
 }
 
 /**
@@ -122,7 +126,108 @@ export function sampleTextPoints(text: string, opts: TextPointsOptions = {}): Te
     points[i * 2] = (candidates[i * 2] - width / 2) / width;
     points[i * 2 + 1] = (height / 2 - candidates[i * 2 + 1]) / width;
   }
-  return { points, count, aspect: height / width };
+  return {
+    points,
+    count,
+    aspect: height / width,
+    lineCount: lines.length,
+    lineSpacing: lineHeightPx / width,
+  };
+}
+
+/**
+ * Same knobs as `sampleTextPoints`, minus two that only do harm here: `maxPoints`
+ * drops a *random* subset, which shreds the pixel grid the ordering rides on, and
+ * `seed` only ever fed that subsampling. Density is `step`'s job.
+ */
+type WritePathOptions = Omit<TextPointsOptions, "maxPoints" | "seed">;
+
+export interface WritePath {
+  /** xy pairs in `sampleTextPoints` space (centered, y-up, full width 1), in writing order. */
+  path: Float32Array;
+  count: number;
+  /** aspect = height / width of the rasterized text block. */
+  aspect: number;
+  /** Index (in points, not floats) where each line begins; line k spans [lineStarts[k], lineStarts[k+1] ?? count). */
+  lineStarts: number[];
+}
+
+/**
+ * Order the glyph pixels of `text` into the sequence a hand would write them in:
+ * lines from the top down, and within a line along the reading direction — left
+ * to right, or right to left when `lang === "ar"`.
+ *
+ * Not glyph-outline extraction. `sampleTextPoints` rasterizes through a 2D canvas,
+ * which has already done the bidi and the ligature shaping, so the pixels land
+ * correctly laid out and all that is missing is their order. What comes back is a
+ * dense sweep *through* the ink, not a centerline — animate it and the letters
+ * write themselves on; it is not a sparse curve to hang a spline off.
+ *
+ * `step` alone sets the density, and 3 (~130 points per character) is the floor:
+ * at 4 there are too few columns per stem and the sweep decays into a sawtooth.
+ * Do not thin the result either — the fine structure *is* the per-column runs, so
+ * dropping every Nth point destroys it just as badly. Raise `fontSize` with `step`.
+ *
+ * Feed `path` to a fingertip, a swim spline or a ribbon — but lift the pen at each
+ * `lineStarts` boundary, where the hand travels back across the whole block.
+ */
+export function orderWritePath(text: string, opts: WritePathOptions = {}): WritePath {
+  const { step = 3, lang, ...rest } = opts;
+  // Uncapped on purpose — see WritePathOptions.
+  const { points, count, aspect, lineCount, lineSpacing } = sampleTextPoints(text, {
+    step,
+    maxPoints: Infinity,
+    lang,
+    ...rest,
+  });
+
+  const top = ((lineCount - 1) / 2) * lineSpacing;
+  const line = new Int32Array(count);
+  for (let i = 0; i < count; i++) {
+    const k = Math.round((top - points[i * 2 + 1]) / lineSpacing);
+    line[i] = Math.min(lineCount - 1, Math.max(0, k)); // ascenders and descenders overhang their band
+  }
+
+  // The one place the Arabic-first promise lands: a left-to-right sweep across
+  // Arabic would look wrong to a native reader before they read a single letter.
+  const dir = lang === "ar" ? -1 : 1;
+  const order = Array.from({ length: count }, (_, i) => i);
+  order.sort(
+    (a, b) =>
+      line[a] - line[b] ||
+      dir * (points[a * 2] - points[b * 2]) ||
+      points[b * 2 + 1] - points[a * 2 + 1],
+  );
+
+  const path = new Float32Array(count * 2);
+  const lineStarts: number[] = [];
+  let prevLine = -1;
+  let col = 0;
+  let w = 0;
+  for (let i = 0; i < count; ) {
+    // one column of the raster grid: same line, same x, already sorted top-down
+    const li = line[order[i]];
+    const x = points[order[i] * 2];
+    let j = i;
+    while (j < count && line[order[j]] === li && points[order[j] * 2] === x) j++;
+    if (li !== prevLine) {
+      lineStarts.push(w);
+      prevLine = li;
+      col = 0;
+    }
+    // every other column runs bottom-up, so the pen snakes down and back up the
+    // stroke instead of flying to the top of each column — a ribbon or a koi
+    // following the straight sort reads as a sawtooth.
+    for (let k = i; k < j; k++) {
+      const id = order[col % 2 === 0 ? k : j - 1 - (k - i)];
+      path[w * 2] = points[id * 2];
+      path[w * 2 + 1] = points[id * 2 + 1];
+      w++;
+    }
+    col++;
+    i = j;
+  }
+  return { path, count, aspect, lineStarts };
 }
 
 interface TextTextureOptions {
