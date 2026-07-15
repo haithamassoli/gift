@@ -134,166 +134,192 @@ export default function Create() {
         </p>
       </div>
 
-      {def.variants.map((variant) => (
-        <div key={variant.key}>
-          <p className="mb-2 text-sm font-medium text-stone-300">
-            {pick(lang, variant.label, variant.labelAr)}
-          </p>
-          {variant.options.length > 6 ? (
-            <select
-              value={variants[variant.key]}
-              onChange={(e) =>
-                setVariants((prev) => ({ ...prev, [variant.key]: e.target.value }))
-              }
-              className={`${inputClass} appearance-none`}
-            >
-              {variant.options.map((option) => (
-                <option key={option.value} value={option.value} className="bg-[#100b14]">
-                  {pick(lang, option.label, option.labelAr)}
-                </option>
-              ))}
-            </select>
-          ) : (
-          <div className="flex flex-wrap gap-2">
-            {variant.options.map((option) => {
-              const selected = variants[variant.key] === option.value;
-              return (
-                <button
-                  key={option.value}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() =>
-                    setVariants((prev) => ({ ...prev, [variant.key]: option.value }))
-                  }
-                  className={`rounded-full px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
-                    selected
-                      ? "bg-rose-500 text-white"
-                      : "border border-white/15 text-stone-300 hover:border-white/30"
-                  }`}
-                >
-                  {pick(lang, option.label, option.labelAr)}
-                </button>
-              );
-            })}
+      <section aria-labelledby="sec-core" className="flex flex-col gap-6">
+        <h2 id="sec-core" className="font-serif text-xl text-stone-100">
+          {t.create.sectionCore}
+        </h2>
+
+        {def.variants.map((variant) => (
+          <div key={variant.key}>
+            <p className="mb-2 text-sm font-medium text-stone-300">
+              {pick(lang, variant.label, variant.labelAr)}
+            </p>
+            {variant.options.length > 6 ? (
+              <select
+                value={variants[variant.key]}
+                onChange={(e) =>
+                  setVariants((prev) => ({ ...prev, [variant.key]: e.target.value }))
+                }
+                className={`${inputClass} appearance-none`}
+              >
+                {variant.options.map((option) => (
+                  <option key={option.value} value={option.value} className="bg-[#100b14]">
+                    {pick(lang, option.label, option.labelAr)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+            <div className="flex flex-wrap gap-2">
+              {variant.options.map((option) => {
+                const selected = variants[variant.key] === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() =>
+                      setVariants((prev) => ({ ...prev, [variant.key]: option.value }))
+                    }
+                    className={`rounded-full px-4 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${
+                      selected
+                        ? "bg-rose-500 text-white"
+                        : "border border-white/15 text-stone-300 hover:border-white/30"
+                    }`}
+                  >
+                    {pick(lang, option.label, option.labelAr)}
+                  </button>
+                );
+              })}
+            </div>
+            )}
           </div>
-          )}
-        </div>
-      ))}
+        ))}
 
-      <label className="block">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-stone-300">{t.create.yourName}</span>
-          <span className="text-xs text-stone-500">
-            {senderName.length}/{NAME_MAX}
-          </span>
-        </div>
-        <input
-          type="text"
-          value={senderName}
-          maxLength={NAME_MAX}
-          onChange={(e) => setSenderName(e.target.value)}
-          placeholder={t.create.fromPlaceholder}
-          className={inputClass}
-        />
-      </label>
-
-      <label className="block">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-stone-300">{t.create.theirName}</span>
-          <span className="text-xs text-stone-500">
-            {recipientName.length}/{NAME_MAX}
-          </span>
-        </div>
-        <input
-          type="text"
-          value={recipientName}
-          maxLength={NAME_MAX}
-          onChange={(e) => setRecipientName(e.target.value)}
-          placeholder={t.create.toPlaceholder}
-          className={inputClass}
-        />
-      </label>
-
-      <label className="block">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-sm font-medium text-stone-300">{t.create.message}</span>
-          <span className="text-xs text-stone-500">
-            {message.length}/{MESSAGE_MAX}
-          </span>
-        </div>
-        <textarea
-          value={message}
-          maxLength={MESSAGE_MAX}
-          rows={4}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={t.create.messagePlaceholder}
-          className={`${inputClass} resize-none`}
-        />
-      </label>
-
-      <label className="block">
-        <span className="mb-2 block text-sm font-medium text-stone-300">
-          {t.create.attachment}
-        </span>
-        <input
-          type="url"
-          inputMode="url"
-          value={payload}
-          maxLength={PAYLOAD_MAX}
-          onChange={(e) => setPayload(e.target.value)}
-          placeholder={t.create.attachmentPlaceholder}
-          className={inputClass}
-        />
-      </label>
-
-      <VoiceRecorder onChange={setVoiceBlob} />
-
-      <div className="flex flex-col gap-3">
-        <label className="flex items-center gap-3 text-sm font-medium text-stone-300">
+        <label className="block">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium text-stone-300">{t.create.yourName}</span>
+            <span className="text-xs text-stone-500">
+              {senderName.length}/{NAME_MAX}
+            </span>
+          </div>
           <input
-            type="checkbox"
-            checked={scheduled}
-            onChange={(e) => setScheduled(e.target.checked)}
-            className="size-4 accent-rose-500"
+            type="text"
+            value={senderName}
+            maxLength={NAME_MAX}
+            onChange={(e) => setSenderName(e.target.value)}
+            placeholder={t.create.fromPlaceholder}
+            className={inputClass}
           />
-          {t.create.scheduleLabel}
         </label>
-        {scheduled ? (
-          <>
-            <input
-              type="datetime-local"
-              value={openAfterLocal}
-              min={minLocal}
-              onChange={(e) => setOpenAfterLocal(e.target.value)}
-              className={`${inputClass} [color-scheme:dark]`}
-            />
-            {openAfterLocal ? (
-              <p className="text-xs text-stone-500">
-                {t.gift.opensOn(
-                  new Date(openAfterLocal).toLocaleString(lang, {
-                    dateStyle: "full",
-                    timeStyle: "short",
-                  }),
-                )}
-              </p>
-            ) : null}
-          </>
-        ) : null}
-      </div>
 
-      <label className="block">
-        <span className="mb-2 block text-sm font-medium text-stone-300">
-          {t.create.notifyLabel}
-        </span>
-        <input
-          type="email"
-          inputMode="email"
-          value={notifyEmail}
-          onChange={(e) => setNotifyEmail(e.target.value)}
-          className={inputClass}
-        />
-        <p className="mt-2 text-xs text-stone-500">{t.create.notifyHint}</p>
-      </label>
+        <label className="block">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium text-stone-300">{t.create.theirName}</span>
+            <span className="text-xs text-stone-500">
+              {recipientName.length}/{NAME_MAX}
+            </span>
+          </div>
+          <input
+            type="text"
+            value={recipientName}
+            maxLength={NAME_MAX}
+            onChange={(e) => setRecipientName(e.target.value)}
+            placeholder={t.create.toPlaceholder}
+            className={inputClass}
+          />
+        </label>
+
+        <label className="block">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium text-stone-300">{t.create.message}</span>
+            <span className="text-xs text-stone-500">
+              {message.length}/{MESSAGE_MAX}
+            </span>
+          </div>
+          <textarea
+            value={message}
+            maxLength={MESSAGE_MAX}
+            rows={4}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={t.create.messagePlaceholder}
+            className={`${inputClass} resize-none`}
+          />
+        </label>
+      </section>
+
+      {/* ponytail: native <details> disclosure — no useState, no aria-expanded, keyboard/SR-accessible free */}
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center justify-between [&::-webkit-details-marker]:hidden">
+          <span className="font-serif text-xl text-stone-100">{t.create.sectionExtras}</span>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            className="size-5 text-stone-400 transition-transform group-open:rotate-180"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </summary>
+        <div className="mt-6 flex flex-col gap-6">
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-stone-300">
+              {t.create.attachment}
+            </span>
+            <input
+              type="url"
+              inputMode="url"
+              value={payload}
+              maxLength={PAYLOAD_MAX}
+              onChange={(e) => setPayload(e.target.value)}
+              placeholder={t.create.attachmentPlaceholder}
+              className={inputClass}
+            />
+          </label>
+
+          <VoiceRecorder onChange={setVoiceBlob} />
+
+          <div className="flex flex-col gap-3">
+            <label className="flex items-center gap-3 text-sm font-medium text-stone-300">
+              <input
+                type="checkbox"
+                checked={scheduled}
+                onChange={(e) => setScheduled(e.target.checked)}
+                className="size-4 accent-rose-500"
+              />
+              {t.create.scheduleLabel}
+            </label>
+            {scheduled ? (
+              <>
+                <input
+                  type="datetime-local"
+                  value={openAfterLocal}
+                  min={minLocal}
+                  onChange={(e) => setOpenAfterLocal(e.target.value)}
+                  className={`${inputClass} [color-scheme:dark]`}
+                />
+                {openAfterLocal ? (
+                  <p className="text-xs text-stone-500">
+                    {t.gift.opensOn(
+                      new Date(openAfterLocal).toLocaleString(lang, {
+                        dateStyle: "full",
+                        timeStyle: "short",
+                      }),
+                    )}
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+          </div>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-stone-300">
+              {t.create.notifyLabel}
+            </span>
+            <input
+              type="email"
+              inputMode="email"
+              value={notifyEmail}
+              onChange={(e) => setNotifyEmail(e.target.value)}
+              className={inputClass}
+            />
+            <p className="mt-2 text-xs text-stone-500">{t.create.notifyHint}</p>
+          </label>
+        </div>
+      </details>
 
       {error && <p className="text-sm text-rose-400">{error}</p>}
 

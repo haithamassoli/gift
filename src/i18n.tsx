@@ -27,6 +27,8 @@ const en = {
   create: {
     back: "← All gifts",
     livePreview: "Live preview",
+    sectionCore: "Your gift",
+    sectionExtras: "Make it special",
     yourName: "Your name",
     theirName: "Their name",
     message: "Message",
@@ -97,6 +99,8 @@ const ar: Strings = {
   create: {
     back: "→ كل الهدايا",
     livePreview: "معاينة مباشرة",
+    sectionCore: "هديتك",
+    sectionExtras: "اجعلها مميّزة",
     yourName: "اسمك",
     theirName: "اسم من تُهديه",
     message: "الرسالة",
