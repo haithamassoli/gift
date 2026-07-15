@@ -1,6 +1,12 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { catalog, MESSAGE_MAX, NAME_MAX } from "../src/gifts/catalog";
+import {
+  catalog,
+  MESSAGE_MAX,
+  NAME_MAX,
+  PAYLOAD_MAX,
+  isSafePayloadUrl,
+} from "../src/gifts/catalog";
 
 const SLUG_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -21,6 +27,7 @@ export const createGift = mutation({
     variants: v.record(v.string(), v.string()),
     lang: v.union(v.literal("en"), v.literal("ar")),
     openAfter: v.optional(v.number()),
+    payload: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const def = catalog[args.giftType];
@@ -35,6 +42,14 @@ export const createGift = mutation({
       throw new Error(`Recipient name must be 1-${NAME_MAX} characters`);
     if (message.length > MESSAGE_MAX)
       throw new Error(`Message must be at most ${MESSAGE_MAX} characters`);
+
+    const payload = args.payload?.trim();
+    if (payload) {
+      if (payload.length > PAYLOAD_MAX)
+        throw new Error(`Link must be at most ${PAYLOAD_MAX} characters`);
+      if (!isSafePayloadUrl(payload))
+        throw new Error("Link must be a valid http(s) URL");
+    }
 
     const variantKeys = Object.keys(args.variants);
     if (variantKeys.length !== def.variants.length)
@@ -72,6 +87,7 @@ export const createGift = mutation({
       slug,
       statusKey,
       ...(openAfter !== undefined ? { openAfter } : {}),
+      ...(payload ? { payload } : {}),
     });
 
     return { slug, statusKey };
@@ -95,6 +111,7 @@ export const getGift = query({
       variants: gift.variants,
       lang: gift.lang ?? "en",
       openAfter: gift.openAfter ?? null,
+      payload: gift.payload ?? null,
     };
   },
 });

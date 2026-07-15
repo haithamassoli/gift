@@ -19,6 +19,12 @@ export default defineSchema({
     // recipient can't see it in the UI early but could in the network response.
     // Upgrade path if that matters: withhold message/variants server-side until now >= openAfter.
     openAfter: v.optional(v.number()),
+    // Optional http(s) URL (photo / link / voucher) revealed after the gift
+    // opens. ponytail: presentational gate like openAfter — getGift returns it,
+    // so it sits in the network response before the reveal; withhold server-side
+    // if that matters. Single URL only; add a type discriminator if raw-text
+    // voucher codes are ever needed.
+    payload: v.optional(v.string()),
   })
     .index("by_slug", ["slug"])
     .index("by_statusKey", ["statusKey"]),

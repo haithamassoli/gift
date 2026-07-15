@@ -4,7 +4,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { GiftCanvas } from "../components/GiftCanvas";
 import { registry } from "../gifts/registry";
-import { MESSAGE_MAX, NAME_MAX, pick, defaultVariants } from "../gifts/catalog";
+import { MESSAGE_MAX, NAME_MAX, PAYLOAD_MAX, pick, defaultVariants } from "../gifts/catalog";
 import { useArabicFontReady } from "../gifts/useArabicFontReady";
 import { useLang, LangToggle } from "../i18n";
 import NotFound from "./NotFound";
@@ -32,6 +32,7 @@ export default function Create() {
   const [senderName, setSenderName] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [message, setMessage] = useState("");
+  const [payload, setPayload] = useState("");
   const [scheduled, setScheduled] = useState(false);
   const [openAfterLocal, setOpenAfterLocal] = useState("");
   const [minLocal] = useState(() => toLocalInput(new Date(Date.now() + 60_000)));
@@ -62,6 +63,7 @@ export default function Create() {
         variants,
         lang,
         openAfter: Number.isNaN(openAfterMs) ? undefined : openAfterMs,
+        payload: payload.trim() || undefined,
       });
       navigate(`/sent/${statusKey}`);
     } catch {
@@ -207,6 +209,21 @@ export default function Create() {
           onChange={(e) => setMessage(e.target.value)}
           placeholder={t.create.messagePlaceholder}
           className={`${inputClass} resize-none`}
+        />
+      </label>
+
+      <label className="block">
+        <span className="mb-2 block text-sm font-medium text-stone-300">
+          {t.create.attachment}
+        </span>
+        <input
+          type="url"
+          inputMode="url"
+          value={payload}
+          maxLength={PAYLOAD_MAX}
+          onChange={(e) => setPayload(e.target.value)}
+          placeholder={t.create.attachmentPlaceholder}
+          className={inputClass}
         />
       </label>
 

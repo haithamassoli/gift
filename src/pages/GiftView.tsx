@@ -12,6 +12,11 @@ import NotFound from "./NotFound";
 
 type Phase = "sealed" | "opening" | "revealed";
 
+// Extension-based image detection for the gated payload. ponytail: misses
+// extensionless image CDN URLs; give the sender an explicit type picker if that
+// case matters. Hoisted out of render (js-hoist-regexp).
+const IMAGE_RE = /\.(png|jpe?g|gif|webp|avif|svg)(\?|#|$)/i;
+
 // Largest-unit relative countdown ("in 3 days" … "in 45 seconds"), fully localized.
 function formatCountdown(ms: number, lang: Lang): string {
   const s = Math.max(0, Math.floor(ms / 1000));
@@ -75,12 +80,18 @@ function LockedSeal({
 function RevealedMessage({
   message,
   senderName,
+  payload,
+  openLinkLabel,
+  photoAlt,
   replayLabel,
   sendBackLabel,
   onReplay,
 }: {
   message: string;
   senderName: string;
+  payload: string | null;
+  openLinkLabel: string;
+  photoAlt: string;
   replayLabel: string;
   sendBackLabel: string;
   onReplay?: () => void;
@@ -101,6 +112,25 @@ function RevealedMessage({
         {message}
       </p>
       <p className="mt-4 text-stone-400">— {senderName}</p>
+      {payload ? (
+        IMAGE_RE.test(payload) ? (
+          <img
+            src={payload}
+            alt={photoAlt}
+            loading="lazy"
+            className="mt-6 w-full rounded-2xl border border-white/10"
+          />
+        ) : (
+          <a
+            href={payload}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex min-h-[48px] items-center rounded-full bg-rose-500 px-6 text-sm font-medium text-white transition hover:bg-rose-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+          >
+            {openLinkLabel}
+          </a>
+        )
+      ) : null}
       {onReplay && (
         <button
           type="button"
@@ -229,6 +259,9 @@ export default function GiftView() {
         <RevealedMessage
           message={gift.message}
           senderName={gift.senderName}
+          payload={gift.payload}
+          openLinkLabel={t.gift.openLink}
+          photoAlt={t.gift.photoAlt}
           replayLabel={t.gift.replay}
           sendBackLabel={t.gift.sendBack}
           onReplay={reducedMotion ? undefined : () => setPhase("opening")}

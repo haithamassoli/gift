@@ -18,6 +18,20 @@ export interface GiftCatalogEntry {
 
 export const NAME_MAX = 40;
 export const MESSAGE_MAX = 280;
+export const PAYLOAD_MAX = 2048;
+
+// A payload is a single http(s) URL (photo / link / voucher) shown to the
+// recipient after they open the gift. Only http(s) may be stored — javascript:
+// and data: URLs are XSS vectors once rendered as an href. Used by the create
+// mutation (server-side security check) and the create form.
+export const isSafePayloadUrl = (raw: string): boolean => {
+  try {
+    const u = new URL(raw);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
 
 // Local "en" | "ar" instead of importing Lang from i18n — keeps this module free
 // of any React/DOM coupling so the Convex bundle stays clean.
