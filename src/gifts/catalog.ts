@@ -32,6 +32,293 @@ export const defaultVariants = (def: GiftCatalogEntry): Record<string, string> =
   Object.fromEntries(def.variants.map((v) => [v.key, v.options[0].value]));
 
 export const catalog: Record<string, GiftCatalogEntry> = {
+  // ---- Batch 3: the recipient is the maker (dip, stitch, light, pluck, stamp) ----
+  qalam: {
+    id: "qalam",
+    name: "Calligrapher's Qalam",
+    nameAr: "قلم الخطّاط",
+    tagline: "Dip the reed; a master's hand writes the rest",
+    taglineAr: "اغمس القلم، ويد الخطّاط تُتمّ الباقي",
+    variants: [
+      {
+        key: "ink",
+        label: "Ink",
+        labelAr: "الحبر",
+        options: opts(
+          ["midnight", "Midnight", "ليلي"],
+          ["oxblood", "Oxblood", "عنّابي"],
+          ["lapis", "Lapis", "لازوردي"],
+        ),
+      },
+      {
+        key: "paper",
+        label: "Paper",
+        labelAr: "الورق",
+        options: opts(
+          ["cream", "Cream", "كريمي"],
+          ["aged", "Aged", "معتّق"],
+          ["indigo", "Indigo", "نيلي"],
+        ),
+      },
+    ],
+  },
+  tatreez: {
+    id: "tatreez",
+    name: "Tatreez Hoop",
+    nameAr: "طارة التطريز",
+    tagline: "Stitch by stitch, the words find home",
+    taglineAr: "غرزة غرزة، تعود الكلمات إلى البيت",
+    variants: [
+      {
+        key: "thread",
+        label: "Thread",
+        labelAr: "الخيط",
+        options: opts(
+          ["crimson", "Crimson", "قرمزي"],
+          ["gold", "Gold", "ذهبي"],
+          ["olive", "Olive", "زيتوني"],
+        ),
+      },
+      {
+        key: "cloth",
+        label: "Cloth",
+        labelAr: "القماش",
+        options: opts(
+          ["indigo", "Indigo", "نيلي"],
+          ["black", "Black", "أسود"],
+          ["linen", "Linen", "كتّاني"],
+        ),
+      },
+    ],
+  },
+  fanous: {
+    id: "fanous",
+    name: "Fanous",
+    nameAr: "الفانوس",
+    tagline: "Light the wick; the walls learn your words",
+    taglineAr: "أشعل الفتيل، فتحفظ الجدران كلماتك",
+    variants: [
+      {
+        key: "glass",
+        label: "Glass",
+        labelAr: "الزجاج",
+        options: opts(
+          ["amber", "Amber", "كهرماني"],
+          ["emerald", "Emerald", "زمردي"],
+          ["ruby", "Ruby", "ياقوتي"],
+        ),
+      },
+      {
+        key: "pattern",
+        label: "Pattern",
+        labelAr: "النقش",
+        options: opts(
+          ["stars", "Stars", "نجوم"],
+          ["arabesque", "Arabesque", "أرابيسك"],
+          ["crescents", "Crescents", "أهلّة"],
+        ),
+      },
+    ],
+  },
+  falcon: {
+    id: "falcon",
+    name: "The Falconer",
+    nameAr: "الصقّار",
+    tagline: "Cast her to the wind; she returns with your words",
+    taglineAr: "أطلقه للريح، فيعود بكلماتك",
+    variants: [
+      {
+        key: "falcon",
+        label: "Falcon",
+        labelAr: "الصقر",
+        options: opts(
+          ["shaheen", "Shaheen", "شاهين"],
+          ["saker", "Saker", "حُر"],
+          ["white-gyr", "White Gyr", "جير أبيض"],
+        ),
+      },
+      {
+        key: "hour",
+        label: "Hour",
+        labelAr: "الوقت",
+        options: opts(
+          ["dusk", "Dusk", "غسق"],
+          ["dawn", "Dawn", "فجر"],
+          ["moonlit", "Moonlit", "مقمر"],
+        ),
+      },
+    ],
+  },
+  typewriter: {
+    id: "typewriter",
+    name: "Typewriter",
+    nameAr: "الآلة الكاتبة",
+    tagline: "Whatever you press, it types the truth",
+    taglineAr: "مهما ضغطت، تكتب الحقيقة",
+    variants: [
+      {
+        key: "machine",
+        label: "Machine",
+        labelAr: "الآلة",
+        options: opts(
+          ["mint", "Mint", "نعناعي"],
+          ["coral", "Coral", "مرجاني"],
+          ["charcoal", "Charcoal", "فحمي"],
+        ),
+      },
+      {
+        key: "ink",
+        label: "Ink",
+        labelAr: "الحبر",
+        options: opts(["black", "Black", "أسود"], ["red-black", "Red & Black", "أحمر وأسود"]),
+      },
+    ],
+  },
+  "domino-run": {
+    id: "domino-run",
+    name: "Domino Run",
+    nameAr: "صف الدومينو",
+    tagline: "One touch, and every piece falls into place",
+    taglineAr: "لمسة واحدة، فيقع كل حجر في مكانه",
+    variants: [
+      {
+        key: "tiles",
+        label: "Tiles",
+        labelAr: "الأحجار",
+        options: opts(
+          ["ivory", "Ivory", "عاجي"],
+          ["jet", "Jet", "فاحم"],
+          ["rosewood", "Rosewood", "خشب الورد"],
+        ),
+      },
+      {
+        key: "table",
+        label: "Table",
+        labelAr: "الطاولة",
+        options: opts(
+          ["green-felt", "Green Felt", "جوخ أخضر"],
+          ["walnut", "Walnut", "جوز"],
+          ["slate", "Slate", "إردواز"],
+        ),
+      },
+    ],
+  },
+  "neon-sign": {
+    id: "neon-sign",
+    name: "Neon Workshop",
+    nameAr: "ورشة النيون",
+    tagline: "Trace the glass until the night says it out loud",
+    taglineAr: "تتبّع الزجاج حتى يقولها الليل",
+    variants: [
+      {
+        key: "gas",
+        label: "Gas",
+        labelAr: "الغاز",
+        options: opts(
+          ["rose", "Rose", "وردي"],
+          ["cyan", "Cyan", "سماوي"],
+          ["amber", "Amber", "كهرماني"],
+        ),
+      },
+      {
+        key: "night",
+        label: "Night",
+        labelAr: "الليل",
+        options: opts(
+          ["rain", "Rain", "مطر"],
+          ["clear", "Clear", "صحو"],
+          ["fog", "Fog", "ضباب"],
+        ),
+      },
+    ],
+  },
+  oud: {
+    id: "oud",
+    name: "The Oud",
+    nameAr: "العود",
+    tagline: "Pluck the strings; the melody remembers",
+    taglineAr: "داعب الأوتار، فاللحن يتذكّر",
+    variants: [
+      {
+        key: "wood",
+        label: "Wood",
+        labelAr: "الخشب",
+        options: opts(
+          ["honey", "Honey", "عسلي"],
+          ["walnut", "Walnut", "جوز"],
+          ["ebony", "Ebony", "أبنوس"],
+        ),
+      },
+      {
+        key: "maqam",
+        label: "Maqam",
+        labelAr: "المقام",
+        options: opts(
+          ["hijaz", "Hijaz", "حجاز"],
+          ["nahawand", "Nahawand", "نهاوند"],
+          ["rast", "Rast", "راست"],
+        ),
+      },
+    ],
+  },
+  "wax-seal": {
+    id: "wax-seal",
+    name: "Wax & Seal",
+    nameAr: "الشمع والختم",
+    tagline: "Some words deserve to be sealed",
+    taglineAr: "بعض الكلمات تستحق أن تُختَم",
+    variants: [
+      {
+        key: "wax",
+        label: "Wax",
+        labelAr: "الشمع",
+        options: opts(
+          ["crimson", "Crimson", "قرمزي"],
+          ["gold", "Gold", "ذهبي"],
+          ["midnight", "Midnight", "ليلي"],
+        ),
+      },
+      {
+        key: "stamp",
+        label: "Stamp",
+        labelAr: "الختم",
+        options: opts(
+          ["initials", "Initials", "أحرف"],
+          ["heart", "Heart", "قلب"],
+          ["star", "Star", "نجمة"],
+        ),
+      },
+    ],
+  },
+  hourglass: {
+    id: "hourglass",
+    name: "Hourglass",
+    nameAr: "الساعة الرملية",
+    tagline: "Turn it over; every grain knows where to land",
+    taglineAr: "اقلبها، فكل حبّة رمل تعرف مكانها",
+    variants: [
+      {
+        key: "sand",
+        label: "Sand",
+        labelAr: "الرمل",
+        options: opts(
+          ["gold", "Gold", "ذهبي"],
+          ["rose", "Rose", "وردي"],
+          ["silver", "Silver", "فضي"],
+        ),
+      },
+      {
+        key: "frame",
+        label: "Frame",
+        labelAr: "الإطار",
+        options: opts(
+          ["brass", "Brass", "نحاس"],
+          ["ebony", "Ebony", "أبنوس"],
+          ["steel", "Steel", "فولاذ"],
+        ),
+      },
+    ],
+  },
   "eternal-rose": {
     id: "eternal-rose",
     name: "Eternal Rose",

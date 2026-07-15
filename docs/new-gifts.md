@@ -159,8 +159,8 @@ Per gift, definition of done matches M3: all four phases, both viewports, both l
 
 ## Parking lot (not specced, keep for Batch 3)
 
-- **Typewriter** — keys ghost-type the message letter by letter, clack audio; the most message-forward concept there is.
-- **Fanous** — Ramadan lantern; pierced-metal light projects the words on a wall. Seasonal (Ramadan/Eid) drop.
+- **Typewriter** — keys ghost-type the message letter by letter, clack audio; the most message-forward concept there is. → promoted to [Batch 3](new-gifts-3.md).
+- **Fanous** — Ramadan lantern; pierced-metal light projects the words on a wall. Seasonal (Ramadan/Eid) drop. → promoted to [Batch 3](new-gifts-3.md).
 - **Polaroid** — flash, then shake-to-develop the handwritten note.
 - **Kaleidoscope** — rotate until mirrored shards snap into the words.
 - **Radio dial** — tune through static to find "their station" broadcasting the message.

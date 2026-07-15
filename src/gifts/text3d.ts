@@ -230,6 +230,104 @@ export function orderWritePath(text: string, opts: WritePathOptions = {}): Write
   return { path, count, aspect, lineStarts };
 }
 
+interface TextGridOptions {
+  /** Target grid width in cells; the message is rasterized to this many columns. */
+  cols: number;
+  fontFamily?: string;
+  fontWeight?: string;
+  maxWidthPx?: number;
+  lineHeight?: number;
+  /** Alpha cutoff for "a cell holds ink" (0..255, default 110). */
+  threshold?: number;
+  /** "ar" overrides fontFamily to Thmanyah and sets rtl bidi. */
+  lang?: Lang;
+}
+
+export interface TextGrid {
+  cols: number;
+  rows: number;
+  /** Row-major, 1 = lit (ink), length cols*rows. Row 0 is the top line. */
+  cells: Uint8Array;
+  /** Number of lit cells. */
+  lit: number;
+  /** rows / cols — cells are square, so this is also the block's height/width. */
+  aspect: number;
+}
+
+/**
+ * Rasterize `text` to a low-res boolean grid — one aesthetic, two users:
+ * `tatreez` stitches an X per lit cell, `domino-run` topples a tile per lit cell.
+ *
+ * Like `sampleTextPoints`, it rasterizes through a 2D canvas, so bidi and Arabic
+ * ligature shaping are already done — the grid comes out reading correctly with no
+ * shaping work here. Cells are kept square (rows derived from the canvas aspect) so
+ * the stitched/toppled letters are not stretched. A cell lights if *any* pixel in its
+ * block clears `threshold`, not the block average: at ~48 columns a hairline stem is a
+ * single pixel wide, and averaging erases it — max-alpha keeps thin strokes legible.
+ */
+export function rasterTextGrid(text: string, opts: TextGridOptions): TextGrid {
+  const {
+    cols,
+    fontFamily = "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    fontWeight = "700",
+    lineHeight = 1.15,
+    threshold = 110,
+    lang,
+  } = opts;
+  const family = lang === "ar" ? AR_FONT : fontFamily;
+  const rtl = lang === "ar";
+  const fontSize = 64;
+  const maxWidthPx = opts.maxWidthPx ?? fontSize * 9;
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+  ctx.font = `${fontWeight} ${fontSize}px ${family}`;
+  if (rtl) ctx.direction = "rtl";
+  const lines = wrapLines(ctx, text, maxWidthPx);
+
+  const lineHeightPx = fontSize * lineHeight;
+  const pad = Math.ceil(fontSize * 0.2);
+  const width = Math.ceil(Math.max(...lines.map((l) => ctx.measureText(l).width), 1)) + pad * 2;
+  const height = Math.ceil(lines.length * lineHeightPx) + pad * 2;
+  canvas.width = width;
+  canvas.height = height;
+
+  ctx.font = `${fontWeight} ${fontSize}px ${family}`;
+  if (rtl) ctx.direction = "rtl";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#fff";
+  lines.forEach((line, i) => {
+    ctx.fillText(line, width / 2, pad + (i + 0.5) * lineHeightPx);
+  });
+
+  const data = ctx.getImageData(0, 0, width, height).data;
+  const cellPx = width / cols; // square cells: derive rows from the same pixel size
+  const rows = Math.max(1, Math.round(height / cellPx));
+  const cells = new Uint8Array(cols * rows);
+  let lit = 0;
+  for (let r = 0; r < rows; r++) {
+    const y0 = Math.floor((r * height) / rows);
+    const y1 = Math.max(y0 + 1, Math.floor(((r + 1) * height) / rows));
+    for (let c = 0; c < cols; c++) {
+      const x0 = Math.floor((c * width) / cols);
+      const x1 = Math.max(x0 + 1, Math.floor(((c + 1) * width) / cols));
+      let on = 0;
+      for (let y = y0; y < y1 && !on; y++) {
+        for (let x = x0; x < x1; x++) {
+          if (data[(y * width + x) * 4 + 3] > threshold) {
+            on = 1;
+            break;
+          }
+        }
+      }
+      cells[r * cols + c] = on;
+      lit += on;
+    }
+  }
+  return { cols, rows, cells, lit, aspect: rows / cols };
+}
+
 interface TextTextureOptions {
   fontSize?: number;
   fontFamily?: string;

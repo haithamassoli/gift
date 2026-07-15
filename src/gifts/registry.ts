@@ -4,6 +4,17 @@ import type { GiftDef } from "./types";
 
 // One lazy() entry per gift keeps each scene in its own code-split chunk.
 const scenes = {
+  // Batch 3
+  qalam: lazy(() => import("./qalam/Scene")),
+  tatreez: lazy(() => import("./tatreez/Scene")),
+  fanous: lazy(() => import("./fanous/Scene")),
+  "neon-sign": lazy(() => import("./neon-sign/Scene")),
+  typewriter: lazy(() => import("./typewriter/Scene")),
+  "domino-run": lazy(() => import("./domino-run/Scene")),
+  oud: lazy(() => import("./oud/Scene")),
+  "wax-seal": lazy(() => import("./wax-seal/Scene")),
+  hourglass: lazy(() => import("./hourglass/Scene")),
+  falcon: lazy(() => import("./falcon/Scene")),
   "eternal-rose": lazy(() => import("./eternal-rose/Scene")),
   moonflower: lazy(() => import("./moonflower/Scene")),
   fireworks: lazy(() => import("./fireworks/Scene")),
