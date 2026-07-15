@@ -1,5 +1,6 @@
 import { GiftPreviewCard } from "../components/GiftPreviewCard";
 import { Logo } from "../components/Logo";
+import { SiteCredit } from "../components/SiteCredit";
 import { registry } from "../gifts/registry";
 import { useLang, LangToggle } from "../i18n";
 
@@ -20,6 +21,7 @@ export default function Home() {
           {t.home.title}
         </h1>
         <p className="mt-4 text-stone-400">{t.home.subtitle}</p>
+        <SiteCredit className="mt-3" />
       </header>
 
       <div className="grid grid-cols-1 gap-6 pb-16 sm:grid-cols-2">

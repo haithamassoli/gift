@@ -6,6 +6,7 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
 import "./index.css";
 import { LangProvider } from "./i18n";
+import { SiteCredit } from "./components/SiteCredit";
 import Loading from "./components/Loading";
 import Sent from "./pages/Sent";
 import NotFound from "./pages/NotFound";
@@ -57,6 +58,9 @@ createRoot(document.getElementById("root")!).render(
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          <footer className="py-8 text-center">
+            <SiteCredit />
+          </footer>
         </LangProvider>
       </BrowserRouter>
     </ConvexProvider>

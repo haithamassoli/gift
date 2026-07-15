@@ -15,6 +15,7 @@ const en = {
   common: {
     // Announced by the loading screen's role="status"; never shown on screen.
     loading: "Loading",
+    madeBy: "Made by",
   },
   home: {
     title: "Gift",
@@ -67,6 +68,7 @@ type Strings = typeof en;
 const ar: Strings = {
   common: {
     loading: "جارٍ التحميل",
+    madeBy: "صُنع بواسطة",
   },
   home: {
     title: "هدية",
