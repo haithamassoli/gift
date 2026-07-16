@@ -25,7 +25,10 @@ http.route({
     const gift = await ctx.runQuery(api.gifts.getGift, { slug });
 
     const canonical = "https://gift.assoli.site/g/" + slug;
-    const image = "https://gift.assoli.site/og-image.png";
+    // Per-gift card rendered by src/app/g/[slug]/opengraph-image.tsx; the
+    // two-segment path doesn't match the /g/:slug crawler rewrite, so Next
+    // serves it even to crawler user-agents.
+    const image = canonical + "/opengraph-image";
 
     let title: string;
     if (gift) {
@@ -50,6 +53,9 @@ http.route({
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="${description}">
 <meta property="og:image" content="${image}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
 <meta property="og:url" content="${canonical}">
 <meta name="twitter:card" content="summary_large_image">
 <meta http-equiv="refresh" content="0;url=${canonical}">
