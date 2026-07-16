@@ -21,6 +21,7 @@ export const MESSAGE_MAX = 280;
 export const PAYLOAD_MAX = 2048;
 export const VOICE_MAX_BYTES = 2_000_000;
 export const VOICE_MAX_SECONDS = 60;
+export const PHOTO_MAX_BYTES = 5_000_000;
 
 // A payload is a single http(s) URL (photo / link / voucher) shown to the
 // recipient after they open the gift. Only http(s) may be stored — javascript:

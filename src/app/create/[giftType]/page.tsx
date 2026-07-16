@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
@@ -8,7 +8,15 @@ import type { Id } from "@convex/_generated/dataModel";
 import { GiftCanvas } from "@/components/GiftCanvas";
 import { VoiceRecorder } from "@/components/VoiceRecorder";
 import { registry } from "@/gifts/registry";
-import { MESSAGE_MAX, NAME_MAX, PAYLOAD_MAX, pick, defaultVariants } from "@/gifts/catalog";
+import {
+  MESSAGE_MAX,
+  NAME_MAX,
+  PAYLOAD_MAX,
+  PHOTO_MAX_BYTES,
+  pick,
+  defaultVariants,
+} from "@/gifts/catalog";
+import { addSent } from "@/lib/sentHistory";
 import { useArabicFontReady } from "@/gifts/useArabicFontReady";
 import { useLang, LangToggle } from "@/i18n";
 import NotFound from "@/components/NotFound";
@@ -24,7 +32,7 @@ export default function Create() {
   const { giftType } = useParams<{ giftType?: string }>();
   const def = giftType ? registry[giftType] : undefined;
   const createGift = useMutation(api.gifts.createGift);
-  const generateVoiceUploadUrl = useMutation(api.gifts.generateVoiceUploadUrl);
+  const generateUploadUrl = useMutation(api.gifts.generateUploadUrl);
   const router = useRouter();
   const { lang, t } = useLang();
   const rtl = lang === "ar";
@@ -40,11 +48,23 @@ export default function Create() {
   const [payload, setPayload] = useState("");
   const [notifyEmail, setNotifyEmail] = useState("");
   const [voiceBlob, setVoiceBlob] = useState<Blob | null>(null);
+  const [photo, setPhoto] = useState<{ file: File; url: string } | null>(null);
+  const [photoError, setPhotoError] = useState(false);
   const [scheduled, setScheduled] = useState(false);
   const [openAfterLocal, setOpenAfterLocal] = useState("");
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [burnAfterOpen, setBurnAfterOpen] = useState(false);
   const [minLocal] = useState(() => toLocalInput(new Date(Date.now() + 60_000)));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Revoke the photo thumbnail's object URL when replaced, removed, or on unmount.
+  useEffect(() => {
+    const url = photo?.url;
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [photo]);
 
   if (!def) {
     return <NotFound heading={t.create.unknownHeading} copy={t.create.unknownCopy} />;
@@ -64,7 +84,7 @@ export default function Create() {
         scheduled && openAfterLocal ? new Date(openAfterLocal).getTime() : NaN;
       let voiceId: Id<"_storage"> | undefined;
       if (voiceBlob) {
-        const url = await generateVoiceUploadUrl();
+        const url = await generateUploadUrl();
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": voiceBlob.type },
@@ -73,6 +93,18 @@ export default function Create() {
         if (!res.ok) throw new Error("Voice upload failed");
         const { storageId } = await res.json();
         voiceId = storageId;
+      }
+      let photoId: Id<"_storage"> | undefined;
+      if (photo) {
+        const url = await generateUploadUrl();
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": photo.file.type },
+          body: photo.file,
+        });
+        if (!res.ok) throw new Error("Photo upload failed");
+        const { storageId } = await res.json();
+        photoId = storageId;
       }
       const { statusKey } = await createGift({
         giftType: def.id,
@@ -85,6 +117,15 @@ export default function Create() {
         payload: payload.trim() || undefined,
         notifyEmail: notifyEmail.trim() || undefined,
         voiceId,
+        photoId,
+        recipientEmail: scheduled ? recipientEmail.trim() || undefined : undefined,
+        burnAfterOpen: burnAfterOpen || undefined,
+      });
+      addSent({
+        statusKey,
+        recipientName: recipientName.trim(),
+        giftType: def.id,
+        createdAt: Date.now(),
       });
       router.push(`/sent/${statusKey}`);
     } catch {
@@ -272,6 +313,48 @@ export default function Create() {
             />
           </label>
 
+          <div className="flex flex-col gap-3">
+            <label className="inline-flex min-h-[48px] w-fit cursor-pointer items-center justify-center rounded-full border border-white/15 px-6 font-medium text-stone-300 transition hover:border-white/30 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-rose-400">
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  // Reset so re-picking the same file after removal fires again.
+                  e.target.value = "";
+                  if (!file) return;
+                  if (file.size > PHOTO_MAX_BYTES) {
+                    setPhotoError(true);
+                    return;
+                  }
+                  setPhotoError(false);
+                  setPhoto({ file, url: URL.createObjectURL(file) });
+                }}
+              />
+              {t.create.photoLabel}
+            </label>
+            {photo ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={photo.url}
+                  alt={t.create.photoLabel}
+                  className="size-20 rounded-2xl border border-white/10 object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPhoto(null)}
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-full border border-white/15 px-6 font-medium text-stone-300 transition hover:border-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+                >
+                  {t.create.photoRemove}
+                </button>
+              </div>
+            ) : null}
+            {photoError && (
+              <p className="text-sm text-rose-400">{t.create.photoTooBig}</p>
+            )}
+          </div>
+
           <VoiceRecorder onChange={setVoiceBlob} />
 
           <div className="flex flex-col gap-3">
@@ -279,7 +362,11 @@ export default function Create() {
               <input
                 type="checkbox"
                 checked={scheduled}
-                onChange={(e) => setScheduled(e.target.checked)}
+                onChange={(e) => {
+                  setScheduled(e.target.checked);
+                  // Server rejects recipientEmail without a schedule — never produce it.
+                  if (!e.target.checked) setRecipientEmail("");
+                }}
                 className="size-4 accent-rose-500"
               />
               {t.create.scheduleLabel}
@@ -303,9 +390,34 @@ export default function Create() {
                     )}
                   </p>
                 ) : null}
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-stone-300">
+                    {t.create.recipientEmailLabel}
+                  </span>
+                  <input
+                    type="email"
+                    inputMode="email"
+                    value={recipientEmail}
+                    onChange={(e) => setRecipientEmail(e.target.value)}
+                    className={inputClass}
+                  />
+                  <p className="mt-2 text-xs text-stone-500">
+                    {t.create.recipientEmailHint}
+                  </p>
+                </label>
               </>
             ) : null}
           </div>
+
+          <label className="flex items-center gap-3 text-sm font-medium text-stone-300">
+            <input
+              type="checkbox"
+              checked={burnAfterOpen}
+              onChange={(e) => setBurnAfterOpen(e.target.checked)}
+              className="size-4 accent-rose-500"
+            />
+            {t.create.burnLabel}
+          </label>
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-stone-300">

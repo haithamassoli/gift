@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "convex/react";
+import { QRCodeSVG } from "qrcode.react";
 import { api } from "@convex/_generated/api";
 import Loading from "@/components/Loading";
 import { useLang } from "@/i18n";
@@ -59,6 +60,15 @@ export default function Sent() {
           {shareUrl}
         </div>
 
+        <div>
+          <div className="mx-auto w-fit rounded-2xl bg-white p-3">
+            <QRCodeSVG value={shareUrl} size={144} title={t.sent.shareText} />
+          </div>
+          <p className="mt-2 text-center text-xs text-stone-500">
+            {t.sent.qrHint}
+          </p>
+        </div>
+
         {canShare ? (
           <button
             type="button"
@@ -86,7 +96,7 @@ export default function Sent() {
         </button>
 
         <a
-          href={shareUrl}
+          href={`${shareUrl}?preview=1`}
           target="_blank"
           rel="noreferrer"
           className="text-center text-sm text-stone-400 underline-offset-4 transition hover:text-stone-200 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
@@ -118,6 +128,17 @@ export default function Sent() {
             ) : null}
           </>
         )}
+        {status.reply ? (
+          <div className="mt-4 text-start">
+            <p className="text-sm text-stone-400">{t.sent.replyHeading}</p>
+            <blockquote
+              dir="auto"
+              className="mt-2 border-s-2 border-rose-400/40 ps-4 whitespace-pre-wrap text-stone-200 select-text"
+            >
+              {status.reply}
+            </blockquote>
+          </div>
+        ) : null}
       </div>
 
       <Link

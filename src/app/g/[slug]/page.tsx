@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { GiftCanvas } from "@/components/GiftCanvas";
 import { usePrefersReducedMotion } from "@/components/usePrefersReducedMotion";
+import { MESSAGE_MAX } from "@/gifts/catalog";
 import { registry } from "@/gifts/registry";
 import { useArabicFontReady } from "@/gifts/useArabicFontReady";
 import { strings, type Lang } from "@/i18n";
@@ -67,31 +68,67 @@ function LockedSeal({
 // Mounts hidden, then flips to visible on the next frame so the block fades in.
 // Replaying unmounts this block, so the fade replays cleanly on the next reveal.
 function RevealedMessage({
+  slug,
   message,
   senderName,
   voiceUrl,
   payload,
+  photoUrl,
+  reply,
+  canReply,
   openLinkLabel,
   photoAlt,
+  replyLabel,
+  replyPlaceholder,
+  replySendLabel,
+  replySentLabel,
+  replyErrorLabel,
   replayLabel,
   sendBackLabel,
   onReplay,
 }: {
+  slug: string;
   message: string;
   senderName: string;
   voiceUrl: string | null;
   payload: string | null;
+  photoUrl: string | null;
+  reply: string | null;
+  canReply: boolean;
   openLinkLabel: string;
   photoAlt: string;
+  replyLabel: string;
+  replyPlaceholder: string;
+  replySendLabel: string;
+  replySentLabel: string;
+  replyErrorLabel: string;
   replayLabel: string;
   sendBackLabel: string;
   onReplay?: () => void;
 }) {
   const [shown, setShown] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [sendFailed, setSendFailed] = useState(false);
+  const sendReply = useMutation(api.gifts.sendReply);
   useEffect(() => {
     const id = requestAnimationFrame(() => setShown(true));
     return () => cancelAnimationFrame(id);
   }, []);
+
+  // No local "sent" flag: on success Convex reactivity re-runs getGift and the
+  // reply arrives back through props, swapping the form for the read-only state.
+  const submitReply = async () => {
+    setSubmitting(true);
+    setSendFailed(false);
+    try {
+      await sendReply({ slug, reply: draft });
+    } catch {
+      setSendFailed(true);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -105,6 +142,14 @@ function RevealedMessage({
       <p className="mt-4 text-stone-400">— {senderName}</p>
       {voiceUrl ? (
         <audio controls src={voiceUrl} className="mt-6 w-full" />
+      ) : null}
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          alt={photoAlt}
+          loading="lazy"
+          className="mt-6 w-full rounded-2xl border border-white/10"
+        />
       ) : null}
       {payload ? (
         IMAGE_RE.test(payload) ? (
@@ -123,6 +168,43 @@ function RevealedMessage({
           >
             {openLinkLabel}
           </a>
+        )
+      ) : null}
+      {canReply ? (
+        reply ? (
+          <div className="mt-8">
+            <p className="text-sm text-stone-400">{replySentLabel}</p>
+            <blockquote className="mt-2 whitespace-pre-wrap border-s-2 border-white/15 ps-4 text-stone-300">
+              {reply}
+            </blockquote>
+          </div>
+        ) : (
+          <div className="mt-8">
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-stone-300">
+                {replyLabel}
+              </span>
+              <textarea
+                value={draft}
+                maxLength={MESSAGE_MAX}
+                rows={3}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder={replyPlaceholder}
+                className="w-full resize-none rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-stone-100 placeholder:text-stone-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+              />
+            </label>
+            <button
+              type="button"
+              disabled={submitting || !draft.trim()}
+              onClick={() => void submitReply()}
+              className="mt-3 min-h-[48px] rounded-full border border-white/15 px-6 text-sm text-stone-300 transition hover:border-white/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {replySendLabel}
+            </button>
+            {sendFailed && (
+              <p className="mt-2 text-sm text-rose-400">{replyErrorLabel}</p>
+            )}
+          </div>
         )
       ) : null}
       {onReplay && (
@@ -149,6 +231,14 @@ export default function GiftView() {
   const gift = useQuery(api.gifts.getGift, slug ? { slug } : "skip");
   const markOpened = useMutation(api.gifts.markOpened);
   const [phase, setPhase] = useState<Phase>("sealed");
+  // Sender preview (?preview) must never trip the open receipt. Read once with a
+  // lazy initializer — the preview link is always a full-page load, so this dodges
+  // the useSearchParams Suspense requirement.
+  const [isPreview] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).has("preview"),
+  );
   const reducedMotion = usePrefersReducedMotion();
   // The recipient always sees the gift in the language the sender chose, not
   // their own toggle. Default to "en" until the gift loads (keeps hook order stable).
@@ -163,7 +253,14 @@ export default function GiftView() {
     return <NotFound />;
   }
 
+  // t comes from the gift's language (not the visitor's toggle) — the burned
+  // state below must already speak it.
   const t = strings[lang];
+
+  if (gift.burned) {
+    return <NotFound heading={t.gift.burnedHeading} copy={t.gift.burnedCopy} />;
+  }
+
   const rtl = lang === "ar";
   const def = registry[gift.giftType];
 
@@ -188,7 +285,8 @@ export default function GiftView() {
   const unwrap = () => {
     // Reduced motion: skip the opening animation, go straight to the reveal.
     setPhase(reducedMotion ? "revealed" : "opening");
-    if (slug) void markOpened({ slug });
+    // Preview still plays the animation but never marks the gift opened.
+    if (slug && !isPreview) void markOpened({ slug });
   };
 
   // Presentational lock derived from server truth: sealed hides the message.
@@ -196,6 +294,12 @@ export default function GiftView() {
 
   return (
     <div dir={rtl ? "rtl" : "ltr"} lang={lang} className="flex min-h-dvh flex-col">
+      {/* Visible in every phase so the sender knows the receipt stays untripped. */}
+      {isPreview && (
+        <div className="pointer-events-none fixed top-4 left-1/2 z-10 -translate-x-1/2 rounded-full border border-white/15 bg-black/40 px-4 py-1.5 text-xs text-stone-300 backdrop-blur">
+          {t.gift.previewBadge}
+        </div>
+      )}
       <div className="relative min-h-[60vh] flex-1">
         {/* R3F's wrapper uses height:100%, which needs a definite height — inset-0 gives it one. */}
         <div className="absolute inset-0">
@@ -237,18 +341,32 @@ export default function GiftView() {
                 {t.gift.unwrap}
               </button>
             )}
+            {gift.burnsAfterOpen && (
+              <p className="text-xs text-stone-400 drop-shadow-[0_1px_8px_rgba(0,0,0,0.9)]">
+                {t.gift.burnHint}
+              </p>
+            )}
           </div>
         )}
       </div>
 
       {phase === "revealed" && (
         <RevealedMessage
+          slug={slug ?? ""}
           message={gift.message ?? ""}
           senderName={gift.senderName}
           voiceUrl={gift.voiceUrl}
           payload={gift.payload}
+          photoUrl={gift.photoUrl}
+          reply={gift.reply}
+          canReply={!isPreview}
           openLinkLabel={t.gift.openLink}
           photoAlt={t.gift.photoAlt}
+          replyLabel={t.gift.replyLabel}
+          replyPlaceholder={t.gift.replyPlaceholder}
+          replySendLabel={t.gift.replySend}
+          replySentLabel={t.gift.replySent}
+          replyErrorLabel={t.create.error}
           replayLabel={t.gift.replay}
           sendBackLabel={t.gift.sendBack}
           onReplay={reducedMotion ? undefined : () => setPhase("opening")}

@@ -27,9 +27,20 @@ export default defineSchema({
     payload: v.optional(v.string()),
     // PII — getGift/getStatus must NEVER return it.
     notifyEmail: v.optional(v.string()),
+    // PII — getGift/getStatus must NEVER return it. Emailed the gift link when
+    // the scheduled unlock fires (createGift enforces schedule-only).
+    recipientEmail: v.optional(v.string()),
+    // Recipient thank-you — write-once, enforced in sendReply.
+    reply: v.optional(v.string()),
+    repliedAt: v.optional(v.number()),
+    // Burn after reading: content scrubbed 24h after first open. The row
+    // survives so the sender receipt (openedAt, reply) lives on.
+    burnAfterOpen: v.optional(v.boolean()),
+    burnedAt: v.optional(v.number()),
     // Written by the unseal poke purely to invalidate getGift subscriptions at unlock.
     unsealedAt: v.optional(v.number()),
     voiceId: v.optional(v.id("_storage")),
+    photoId: v.optional(v.id("_storage")),
   })
     .index("by_slug", ["slug"])
     .index("by_statusKey", ["statusKey"]),
