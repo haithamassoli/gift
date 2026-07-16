@@ -39,6 +39,7 @@
   },
   "include": [
     "next-env.d.ts",
+    "next.config.ts",
     "src",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
