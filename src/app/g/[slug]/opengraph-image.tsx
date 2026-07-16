@@ -1,5 +1,4 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@convex/_generated/api";
@@ -9,9 +8,14 @@ export const alt = "A gift for you";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const bold = await readFile(join(process.cwd(), "fonts/thmanyahsans-Bold.otf"));
+// Resolve fonts relative to this module, not process.cwd(): on Vercel the
+// serverless function's cwd isn't where the traced fonts/ dir lands, so a
+// cwd-relative read ENOENTs and 500s every request. import.meta.url is stable.
+const bold = await readFile(
+  new URL("../../../../fonts/thmanyahsans-Bold.otf", import.meta.url),
+);
 const regular = await readFile(
-  join(process.cwd(), "fonts/thmanyahsans-Regular.otf"),
+  new URL("../../../../fonts/thmanyahsans-Regular.otf", import.meta.url),
 );
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
