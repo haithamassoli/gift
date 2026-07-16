@@ -75,8 +75,8 @@ const en = {
     photoAlt: "Shared photo",
   },
   notFound: {
-    heading: "This link doesn't lead to a gift",
-    copy: "It may have been mistyped, or the gift never existed.",
+    heading: "Nothing to unwrap here",
+    copy: "This link doesn't lead to a gift — it may have been mistyped, or the gift was never created.",
     browse: "Browse gifts",
   },
   install: {
@@ -156,8 +156,8 @@ const ar: Strings = {
     photoAlt: "صورة مُرفقة",
   },
   notFound: {
-    heading: "هذا الرابط لا يؤدي إلى هدية",
-    copy: "قد يكون مكتوبًا بشكل خاطئ، أو أن الهدية لم تكن موجودة.",
+    heading: "لا شيء لفتحه هنا",
+    copy: "هذا الرابط لا يؤدي إلى هدية — قد يكون مكتوبًا بشكل خاطئ، أو أن الهدية لم تُنشأ.",
     browse: "تصفّح الهدايا",
   },
   install: {

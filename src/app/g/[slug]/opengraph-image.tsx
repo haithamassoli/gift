@@ -19,12 +19,6 @@ const regular = await readFile(
 );
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
-// Satori has no bidi: it lays out space-separated chunks LTR in logical order.
-// NBSP-joining makes a phrase one chunk, which the opentype Arabic pass then
-// reverses into correct visual order (joined glyphs + word order). Mixed
-// ar/latin lines are handled as separate chunks in a row-reverse flex row.
-const nb = (s: string) => s.replace(/ /g, " ");
-
 export default async function Image({
   params,
 }: {
@@ -76,6 +70,10 @@ export default async function Image({
           width: "100%",
           height: "100%",
           display: "flex",
+          // RTL for Arabic word order. Do NOT hand-roll bidi by NBSP-joining
+          // words: Satori's Arabic shaper crashes (codePointAt of undefined) on
+          // some NBSP-joined runs. `direction` lets it shape + order correctly.
+          direction: ar ? "rtl" : "ltr",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
@@ -89,7 +87,7 @@ export default async function Image({
         <div
           style={{
             display: "flex",
-            flexDirection: ar ? "row-reverse" : "row",
+            flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "center",
             gap: 14,
@@ -103,7 +101,7 @@ export default async function Image({
               key={i}
               style={{ display: "flex", color: c.hi ? "#fda4af" : undefined }}
             >
-              {nb(c.t)}
+              {c.t}
             </div>
           ))}
         </div>
@@ -116,7 +114,7 @@ export default async function Image({
             textAlign: "center",
           }}
         >
-          {nb(title)}
+          {title}
         </div>
         <div
           style={{
@@ -126,7 +124,7 @@ export default async function Image({
             color: "#a8a29e",
           }}
         >
-          {nb(tagline)}
+          {tagline}
         </div>
       </div>
     ),
