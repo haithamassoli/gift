@@ -64,19 +64,17 @@ function Spark({ s, id }: { s: number; id: string }) {
   );
 }
 
-// Satori renders the space between two Arabic words ~1.2em wide (each RTL run
-// gets padded at its shaping boundary), so pure-Arabic strings are split into
-// per-word flex children with a controlled gap. CAUTION: Satori bidi-reorders
-// those chunk rows correctly in the exact row structures used below (verified
-// by screenshot for the name row, from row, and CTA pill) but NOT in every flex
-// shape — a structurally new Arabic chunk row must be re-verified visually, and
-// so must these on any next/og upgrade. Single-word labels (إلى / من) and
-// mixed/Latin strings stay single nodes: single-node bidi is always ordered
-// correctly, its spaces are just wide. Never NBSP-join instead — that crashes
-// Satori's Arabic shaper, see [[og-image-arabic-rtl]].
-const pureAr = (s: string) => /^[؀-ۿ\s]+$/.test(s);
+// Satori never bidi-reorders element children — chunk rows always lay out in
+// physical LTR order. Pure-Arabic strings are still split into per-word
+// children (a single Arabic text node renders its inter-word spaces ~1.2em
+// wide), and every ar chunk row runs flexDirection row-reverse so the LOGICAL
+// word order reads right-to-left; row-reverse also wraps correctly (first
+// words fill the top line from the right). Mixed/Latin strings stay single
+// nodes: Satori's per-node bidi orders those correctly under the root's
+// direction:rtl. Never NBSP-join — that crashes the shaper, see
+// [[og-image-arabic-rtl]].
 const words = (s: string): string[] =>
-  pureAr(s) ? s.trim().split(/\s+/) : [s];
+  /^[؀-ۿ\s]+$/.test(s) ? s.trim().split(/\s+/) : [s];
 
 // Deterministic mote scatter (x, y, size, gold?, opacity) — kept symmetric enough
 // that the same coordinates read fine mirrored under RTL.
@@ -111,9 +109,7 @@ export default async function Image({
   // The card is the outside of the parcel: address only, never the contents.
   // No catalog import — the gift type must not leak into the preview.
   const recipient = gift?.recipientName ?? "You";
-  // Ar labels are single words on purpose: Satori reorders chunked Arabic rows
-  // inconsistently (see `words`), and one-word labels have nothing to reorder.
-  // "إلى / من" also reads exactly like an Arabic parcel address.
+  // "إلى / من" — single-word labels that read like an Arabic parcel address.
   const eyebrow = ar ? "إلى" : "A GIFT FOR";
   const fromLabel = ar ? "من" : "from";
   const sender = gift?.senderName ?? "someone who knows you";
@@ -316,31 +312,24 @@ export default async function Image({
             gap: 22,
           }}
         >
-          {/* Structure mirrors the CTA pill exactly (display flex + gap, no
-              flexDirection, no letterSpacing in ar) — the one shape Satori
-              reliably bidi-reorders chunked Arabic words in. letterSpacing
-              (even 0) forces a per-glyph path that skips reordering. */}
+          {/* en gets letterspaced caps; the ar label stays bare — tracking
+              inside Arabic breaks glyph joining. */}
           <div
             style={{
               display: "flex",
-              gap: 0,
               fontSize: ar ? 34 : 26,
               color: "rgba(255,233,196,0.62)",
               ...(ar ? {} : { letterSpacing: 7 }),
             }}
           >
-            {words(eyebrow).map((w, i) => (
-              <div key={i} style={{ display: "flex" }}>
-                {w}
-              </div>
-            ))}
+            {eyebrow}
           </div>
           <div
             style={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: ar ? "row-reverse" : "row",
               flexWrap: "wrap",
-              justifyContent: ar ? "flex-end" : "flex-start",
+              justifyContent: "flex-start",
               maxWidth: 660,
               // Chunked ar words carry ~0.3em phantom advance from the shaper;
               // a small gap on top of that lands at a natural word space.
@@ -366,33 +355,24 @@ export default async function Image({
               </div>
             ))}
           </div>
-          {/* Satori only bidi-reorders the two-node row when every child is
-              Arabic; an ar card with a Latin sender ("من Suleiman") must be a
-              single node or من lands on the wrong side. */}
-          {ar && !pureAr(sender) ? (
-            <div style={{ display: "flex", maxWidth: 660, fontSize: 33, color: "#fda4af" }}>
-              {`${fromLabel} ${sender}`}
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                flexWrap: "wrap",
-                justifyContent: ar ? "flex-end" : "flex-start",
-                maxWidth: 660,
-                gap: ar ? 10 : 12,
-                fontSize: 33,
-              }}
-            >
-              <div style={{ display: "flex", color: "#a8a29e" }}>{fromLabel}</div>
-              {words(sender).map((w, i) => (
-                <div key={i} style={{ display: "flex", color: "#fda4af" }}>
-                  {w}
-                </div>
-              ))}
-            </div>
-          )}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: ar ? "row-reverse" : "row",
+              flexWrap: "wrap",
+              justifyContent: "flex-start",
+              maxWidth: 660,
+              gap: ar ? 10 : 12,
+              fontSize: 33,
+            }}
+          >
+            <div style={{ display: "flex", color: "#a8a29e" }}>{fromLabel}</div>
+            {words(sender).map((w, i) => (
+              <div key={i} style={{ display: "flex", color: "#fda4af" }}>
+                {w}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Bottom rail: wordmark ↔ unwrap pill. Rows with non-text children don't
@@ -425,6 +405,7 @@ export default async function Image({
           <div
             style={{
               display: "flex",
+              flexDirection: ar ? "row-reverse" : "row",
               alignItems: "center",
               height: 62,
               padding: "0 34px",
