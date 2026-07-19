@@ -10,29 +10,13 @@ import { useParams, notFound } from "next/navigation";
 import { GiftCanvas } from "@/components/GiftCanvas";
 import { defaultVariants, pick } from "@/gifts/catalog";
 import { registry } from "@/gifts/registry";
+import { SAMPLE } from "@/gifts/sample";
 import type { GiftDef, GiftPhase } from "@/gifts/types";
 import { useArabicFontReady } from "@/gifts/useArabicFontReady";
 import type { Lang } from "@/i18n";
 
 const PHASES: GiftPhase[] = ["preview", "sealed", "opening", "revealed"];
 const LANGS: Lang[] = ["en", "ar"];
-
-// Real copy, not lorem: the Arabic has to push actual shaping and rtl bidi
-// through the same raster path a real gift takes.
-const SAMPLE: Record<Lang, { senderName: string; recipientName: string; message: string }> = {
-  en: {
-    senderName: "Haitham",
-    recipientName: "Layla",
-    message:
-      "Every year I go looking for words big enough for you, and every year I come back empty-handed. So here — take the whole sky instead.",
-  },
-  ar: {
-    senderName: "هيثم",
-    recipientName: "ليلى",
-    message:
-      "كل عام أبحث عن كلمات تليق بك، وكل عام أعود بلا شيء. فخذي هذه السماء كلها بدلًا منها.",
-  },
-};
 
 const btn = (on: boolean) =>
   `min-h-[32px] rounded border px-2.5 text-xs transition disabled:opacity-25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 ${

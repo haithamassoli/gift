@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { GiftCanvas } from "./GiftCanvas";
-import type { GiftDef } from "../gifts/types";
+import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+import type { GiftDef, GiftPhase } from "../gifts/types";
 import { pick, defaultVariants } from "../gifts/catalog";
+import { useArabicFontReady } from "../gifts/useArabicFontReady";
+import { SAMPLE } from "../gifts/sample";
 import type { Lang } from "../i18n";
 
 // Mounts a live scene only while the element is scrolled into view, so an
@@ -25,11 +28,35 @@ function useInView<T extends Element>() {
   return [ref, inView] as const;
 }
 
+// lang here is a live toggle (not an immutable gift record), and
+// useArabicFontReady seeds `ready` once at mount — so key this on lang to get a
+// fresh gate that actually loads Thmanyah before the scene's one-time raster.
+// Mirrors the dev harness FontGate.
+function FontGate({ lang, children }: { lang: Lang; children: ReactNode }) {
+  const fontReady = useArabicFontReady(lang === "ar");
+  return lang === "en" || fontReady ? children : null;
+}
+
 export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
   const [ref, inView] = useInView<HTMLDivElement>();
+  const reduced = usePrefersReducedMotion();
+  const [phase, setPhase] = useState<GiftPhase>("sealed");
+  const hasOpened = useRef(false);
 
-  // First option value for each variant key — a neutral default preview.
+  // First option value for each variant key — a neutral default.
   const variants = defaultVariants(def);
+  // Dummy copy so text-bearing scenes reveal something real (not empty).
+  const content = SAMPLE[lang];
+
+  // Auto-play the reveal once, the first time the card scrolls into view.
+  // Reduced motion skips straight to the settled revealed pose.
+  // ponytail: fires per card on scroll-in, no stagger/cap — only in-view cards
+  // hold a canvas (below) and DPR is capped, so a few concurrent opens are fine.
+  useEffect(() => {
+    if (!inView || hasOpened.current) return;
+    hasOpened.current = true;
+    setPhase(reduced ? "revealed" : "opening");
+  }, [inView, reduced]);
 
   return (
     <Link
@@ -43,14 +70,17 @@ export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
         {inView && (
           <div className="absolute inset-0">
             <GiftCanvas>
-              <def.Scene
-                variants={variants}
-                phase="preview"
-                senderName={pick(lang, "You", "أنت")}
-                recipientName={pick(lang, "Someone", "شخص ما")}
-                message=""
-                lang={lang}
-              />
+              <FontGate key={lang} lang={lang}>
+                <def.Scene
+                  variants={variants}
+                  phase={phase}
+                  senderName={content.senderName}
+                  recipientName={content.recipientName}
+                  message={content.message}
+                  lang={lang}
+                  onOpenComplete={() => setPhase("revealed")}
+                />
+              </FontGate>
             </GiftCanvas>
           </div>
         )}
