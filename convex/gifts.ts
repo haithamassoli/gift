@@ -326,3 +326,31 @@ export const getStatuses = query({
     return statuses;
   },
 });
+
+// Site visitor counter — one denormalized "visitors" row. The client dedupes to
+// once/hour in localStorage, so bumps aren't a hot path; Convex OCC retries make
+// this get-or-create race-safe (a concurrent first insert conflicts, and the
+// loser re-reads the row on retry rather than creating a second one).
+export const getVisitors = query({
+  args: {},
+  handler: async (ctx) => {
+    const row = await ctx.db
+      .query("counters")
+      .withIndex("by_name", (q) => q.eq("name", "visitors"))
+      .unique();
+    return row?.count ?? 0;
+  },
+});
+
+export const bumpVisitors = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const row = await ctx.db
+      .query("counters")
+      .withIndex("by_name", (q) => q.eq("name", "visitors"))
+      .unique();
+    if (row) await ctx.db.patch(row._id, { count: row.count + 1 });
+    else await ctx.db.insert("counters", { name: "visitors", count: 1 });
+    return null;
+  },
+});

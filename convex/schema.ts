@@ -44,4 +44,11 @@ export default defineSchema({
   })
     .index("by_slug", ["slug"])
     .index("by_statusKey", ["statusKey"]),
+
+  // Denormalized counters (guidelines: never count via .collect().length).
+  // One row per counter, e.g. name:"visitors".
+  counters: defineTable({
+    name: v.string(),
+    count: v.number(),
+  }).index("by_name", ["name"]),
 });

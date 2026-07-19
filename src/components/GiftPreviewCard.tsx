@@ -37,6 +37,9 @@ function FontGate({ lang, children }: { lang: Lang; children: ReactNode }) {
   return lang === "en" || fontReady ? children : null;
 }
 
+// How long a card holds on the fully revealed pose before it replays.
+const REVEAL_HOLD_MS = 2500;
+
 export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const reduced = usePrefersReducedMotion();
@@ -48,8 +51,8 @@ export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
   // Dummy copy so text-bearing scenes reveal something real (not empty).
   const content = SAMPLE[lang];
 
-  // Auto-play the reveal once, the first time the card scrolls into view.
-  // Reduced motion skips straight to the settled revealed pose.
+  // Kick off the reveal the first time the card scrolls into view.
+  // Reduced motion skips straight to the settled revealed pose (no loop).
   // ponytail: fires per card on scroll-in, no stagger/cap — only in-view cards
   // hold a canvas (below) and DPR is capped, so a few concurrent opens are fine.
   useEffect(() => {
@@ -57,6 +60,15 @@ export function GiftPreviewCard({ def, lang }: { def: GiftDef; lang: Lang }) {
     hasOpened.current = true;
     setPhase(reduced ? "revealed" : "opening");
   }, [inView, reduced]);
+
+  // Loop: hold on the revealed pose, then replay. revealed -> opening is the
+  // harness replay path (it resets the scene's opening clock). Pauses when the
+  // card scrolls out of view; reduced motion opts out entirely.
+  useEffect(() => {
+    if (reduced || phase !== "revealed" || !inView) return;
+    const id = setTimeout(() => setPhase("opening"), REVEAL_HOLD_MS);
+    return () => clearTimeout(id);
+  }, [reduced, phase, inView]);
 
   return (
     <Link

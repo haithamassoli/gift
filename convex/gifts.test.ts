@@ -108,6 +108,15 @@ test("burn scrubs content but keeps the receipt, and is a no-op twice", async ()
   expect(afterSecond?.burnedAt).toBe(burned?.burnedAt);
 });
 
+test("visitor counter creates the row then increments it", async () => {
+  const t = convexTest(schema, modules);
+
+  expect(await t.query(api.gifts.getVisitors, {})).toBe(0);
+  await t.mutation(api.gifts.bumpVisitors, {});
+  await t.mutation(api.gifts.bumpVisitors, {});
+  expect(await t.query(api.gifts.getVisitors, {})).toBe(2);
+});
+
 test("createGift validates the photo blob", async () => {
   const t = convexTest(schema, modules);
 

@@ -24,6 +24,7 @@ const en = {
     filterLabel: "Filter by occasion",
     sentHeading: "Gifts you've sent",
     sentClear: "Clear history",
+    visitors: (n: number): string => (n === 1 ? "visitor" : "visitors"),
   },
   create: {
     back: "← All gifts",
@@ -127,6 +128,7 @@ const ar: Strings = {
     filterLabel: "تصفية حسب المناسبة",
     sentHeading: "الهدايا التي أرسلتها",
     sentClear: "مسح السجلّ",
+    visitors: () => "زائر",
   },
   create: {
     back: "→ كل الهدايا",

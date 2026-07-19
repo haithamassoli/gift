@@ -6,6 +6,7 @@ import { api } from "@convex/_generated/api";
 import { GiftPreviewCard } from "@/components/GiftPreviewCard";
 import { Logo } from "@/components/Logo";
 import { SiteCredit } from "@/components/SiteCredit";
+import { VisitorCounter } from "@/components/VisitorCounter";
 import { registry } from "@/gifts/registry";
 import { occasions, occasionsById, pick, type Occasion } from "@/gifts/catalog";
 import { clearSent, loadSent, type SentEntry } from "@/lib/sentHistory";
@@ -57,6 +58,7 @@ export default function Home() {
         </h1>
         <p className="mt-4 text-stone-400">{t.home.subtitle}</p>
         <SiteCredit className="mt-3" />
+        <VisitorCounter className="mt-5" />
       </header>
 
       <div
