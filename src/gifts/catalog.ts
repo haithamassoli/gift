@@ -53,20 +53,24 @@ export const defaultVariants = (def: GiftCatalogEntry): Record<string, string> =
 // prepends an implicit "All".
 export type Occasion =
   | "love"
+  | "anniversary"
   | "birthday"
   | "celebration"
   | "congrats"
   | "thanks"
   | "apology"
+  | "funny"
   | "thinking-of-you";
 
 export const occasions: { key: Occasion; label: string; labelAr: string }[] = [
   { key: "love", label: "Love", labelAr: "حب" },
+  { key: "anniversary", label: "Anniversary", labelAr: "ذكرى سنوية" },
   { key: "birthday", label: "Birthday", labelAr: "عيد ميلاد" },
   { key: "celebration", label: "Eid & celebration", labelAr: "عيد ومناسبة" },
   { key: "congrats", label: "Congrats", labelAr: "تهنئة" },
   { key: "thanks", label: "Thank you", labelAr: "شكرًا" },
   { key: "apology", label: "Sorry", labelAr: "اعتذار" },
+  { key: "funny", label: "For a laugh", labelAr: "على الضحك" },
   { key: "thinking-of-you", label: "Thinking of you", labelAr: "أفكّر بك" },
 ];
 
@@ -903,6 +907,289 @@ export const catalog: Record<string, GiftCatalogEntry> = {
       },
     ],
   },
+
+  // ---- Batch 4: the pair is the subject — both names on the object, and the
+  // object means nothing with only one of them in it ----
+  henna: {
+    id: "henna",
+    name: "Henna Night",
+    nameAr: "ليلة الحنّة",
+    tagline: "Trace the paste, then wait — the stain remembers",
+    taglineAr: "انقش الحنّاء ثم انتظر، فالأثر يتذكّر",
+    variants: [
+      {
+        key: "pattern",
+        label: "Pattern",
+        labelAr: "النقش",
+        options: opts(
+          ["khaleeji", "Khaleeji", "خليجي"],
+          ["moroccan", "Moroccan", "مغربي"],
+          ["floral", "Floral", "زهري"],
+        ),
+      },
+      {
+        key: "stain",
+        label: "Stain",
+        labelAr: "الأثر",
+        options: opts(
+          ["henna", "Henna", "حنّائي"],
+          ["umber", "Umber", "بنّي داكن"],
+          ["black-cherry", "Black cherry", "كرزي"],
+        ),
+      },
+    ],
+  },
+  "two-halves": {
+    id: "two-halves",
+    name: "Two Halves",
+    nameAr: "نصفان",
+    tagline: "Half a coin says nothing alone",
+    taglineAr: "نصف القطعة لا يقول شيئًا وحده",
+    variants: [
+      {
+        key: "metal",
+        label: "Metal",
+        labelAr: "المعدن",
+        options: opts(
+          ["gold", "Gold", "ذهب"],
+          ["silver", "Silver", "فضة"],
+          ["copper", "Copper", "نحاس"],
+        ),
+      },
+      {
+        key: "engraving",
+        label: "Engraving",
+        labelAr: "النقش",
+        options: opts(
+          ["kufic", "Kufic", "كوفي"],
+          ["diwani", "Diwani", "ديواني"],
+          ["laurel", "Laurel", "غار"],
+        ),
+      },
+    ],
+  },
+  "shadow-play": {
+    id: "shadow-play",
+    name: "Shadow Play",
+    nameAr: "خيال الظلّ",
+    tagline: "Two shadows, one story",
+    taglineAr: "ظلّان، وحكاية واحدة",
+    variants: [
+      {
+        key: "lamp",
+        label: "Lamp",
+        labelAr: "المصباح",
+        options: opts(
+          ["oil", "Oil", "زيتي"],
+          ["candle", "Candle", "شمعة"],
+          ["gas", "Gas", "غازي"],
+        ),
+      },
+      {
+        key: "screen",
+        label: "Screen",
+        labelAr: "الستارة",
+        options: opts(
+          ["linen", "Linen", "كتّان"],
+          ["silk", "Silk", "حرير"],
+          ["paper", "Paper", "ورق"],
+        ),
+      },
+    ],
+  },
+  fingerprint: {
+    id: "fingerprint",
+    name: "Two Prints",
+    nameAr: "بصمتان",
+    tagline: "Press once — the lines already match",
+    taglineAr: "اضغط مرّة، فالخطوط متطابقة من البداية",
+    variants: [
+      {
+        key: "medium",
+        label: "Medium",
+        labelAr: "الوسيط",
+        options: opts(
+          ["clay", "Clay", "طين"],
+          ["ink", "Ink", "حبر"],
+          ["plaster", "Plaster", "جبس"],
+        ),
+      },
+      {
+        key: "ridges",
+        label: "Ridges",
+        labelAr: "الخطوط",
+        options: opts(
+          ["gold", "Gold", "ذهبي"],
+          ["ember", "Ember", "جمري"],
+          ["indigo", "Indigo", "نيلي"],
+        ),
+      },
+    ],
+  },
+  nest: {
+    id: "nest",
+    name: "The Nest",
+    nameAr: "العُشّ",
+    tagline: "Twig by twig, a home",
+    taglineAr: "غصنًا بعد غصن، يصير بيتًا",
+    variants: [
+      {
+        key: "bird",
+        label: "Bird",
+        labelAr: "الطائر",
+        options: opts(
+          ["bulbul", "Bulbul", "بلبل"],
+          ["swallow", "Swallow", "سنونو"],
+          ["sparrow", "Sparrow", "دوري"],
+        ),
+      },
+      {
+        key: "light",
+        label: "Light",
+        labelAr: "الضوء",
+        options: opts(
+          ["dawn", "Dawn", "فجر"],
+          ["golden", "Golden", "أصيل"],
+          ["dusk", "Dusk", "غسق"],
+        ),
+      },
+    ],
+  },
+  "pet-rock": {
+    id: "pet-rock",
+    name: "Pet Rock",
+    nameAr: "الصخرة الأليفة",
+    tagline: "It does nothing. It's yours forever.",
+    taglineAr: "لا تفعل شيئًا، وهي لك للأبد",
+    variants: [
+      {
+        key: "rock",
+        label: "Rock",
+        labelAr: "الصخرة",
+        options: opts(
+          ["granite", "Granite", "جرانيت"],
+          ["sandstone", "Sandstone", "حجر رملي"],
+          ["geode", "Geode", "جيود"],
+        ),
+      },
+      {
+        key: "eyes",
+        label: "Eyes",
+        labelAr: "العيون",
+        options: opts(
+          ["googly", "Googly", "متحرّكة"],
+          ["sleepy", "Sleepy", "نعسانة"],
+          ["heart", "Heart", "قلبية"],
+        ),
+      },
+    ],
+  },
+  scoreboard: {
+    id: "scoreboard",
+    name: "Scoreboard",
+    nameAr: "لوحة النتائج",
+    tagline: "Final score: you were right. Again.",
+    taglineAr: "النتيجة النهائية: الحقّ معك… مرّة أخرى",
+    variants: [
+      {
+        key: "finish",
+        label: "Finish",
+        labelAr: "الطلاء",
+        options: opts(
+          ["cream", "Cream", "كريمي"],
+          ["navy", "Navy", "كحلي"],
+          ["chrome", "Chrome", "كروم"],
+        ),
+      },
+    ],
+  },
+  "excuse-machine": {
+    id: "excuse-machine",
+    name: "The Excuse Machine",
+    nameAr: "آلة الأعذار",
+    tagline: "Pull the lever until it runs out of excuses",
+    taglineAr: "اسحب الذراع حتى تنفد الأعذار",
+    variants: [
+      {
+        key: "cabinet",
+        label: "Cabinet",
+        labelAr: "الآلة",
+        options: opts(
+          ["chrome", "Chrome", "كروم"],
+          ["cherry", "Cherry", "كرزي"],
+          ["brass", "Brass", "نحاسي"],
+        ),
+      },
+      {
+        key: "reels",
+        label: "Reels",
+        labelAr: "البكرات",
+        options: opts(
+          ["fruit", "Fruit", "فواكه"],
+          ["hearts", "Hearts", "قلوب"],
+          ["question", "Question marks", "علامات استفهام"],
+        ),
+      },
+    ],
+  },
+  "burnt-dinner": {
+    id: "burnt-dinner",
+    name: "Dinner Is Served",
+    nameAr: "العشاء جاهز",
+    tagline: "I cooked. I'm sorry. Let's order in.",
+    taglineAr: "طبختُ لك… أعتذر، لنطلب من الخارج",
+    variants: [
+      {
+        key: "dish",
+        label: "Dish",
+        labelAr: "الطبق",
+        options: opts(
+          ["roast", "Roast", "مشوي"],
+          ["cake", "Cake", "كعكة"],
+          ["pasta", "Pasta", "معكرونة"],
+        ),
+      },
+      {
+        key: "kitchen",
+        label: "Kitchen",
+        labelAr: "المطبخ",
+        options: opts(
+          ["cozy", "Cozy", "دافئ"],
+          ["marble", "Marble", "رخامي"],
+          ["candlelit", "Candlelit", "على ضوء الشموع"],
+        ),
+      },
+    ],
+  },
+  "big-screen": {
+    id: "big-screen",
+    name: "Big Screen",
+    nameAr: "الشاشة الكبيرة",
+    tagline: "Sixty thousand people, and the camera found you",
+    taglineAr: "ستون ألفًا، والكاميرا وجدتكما أنتما",
+    variants: [
+      {
+        key: "stadium",
+        label: "Stadium",
+        labelAr: "الملعب",
+        options: opts(
+          ["floodlit", "Floodlit", "أضواء ليلية"],
+          ["sunset", "Sunset", "غروب"],
+          ["indoor", "Indoor", "صالة مغلقة"],
+        ),
+      },
+      {
+        key: "frame",
+        label: "Frame",
+        labelAr: "الإطار",
+        options: opts(
+          ["hearts", "Hearts", "قلوب"],
+          ["confetti", "Confetti", "قصاصات"],
+          ["fireworks", "Fireworks", "ألعاب نارية"],
+        ),
+      },
+    ],
+  },
 };
 
 // Occasion tags per scene — one editable block instead of a field scattered
@@ -943,4 +1230,14 @@ export const occasionsById: Record<string, Occasion[]> = {
   "koi-pond": ["love", "thinking-of-you"],
   "cup-reading": ["thinking-of-you", "love"],
   aurora: ["love", "thinking-of-you"],
+  henna: ["anniversary", "celebration"],
+  "two-halves": ["love", "anniversary"],
+  "shadow-play": ["love"],
+  fingerprint: ["love", "anniversary"],
+  nest: ["love", "congrats"],
+  "pet-rock": ["funny", "thinking-of-you"],
+  scoreboard: ["funny", "anniversary"],
+  "excuse-machine": ["funny", "apology"],
+  "burnt-dinner": ["funny", "apology"],
+  "big-screen": ["funny", "love"],
 };

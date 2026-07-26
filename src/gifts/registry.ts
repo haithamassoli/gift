@@ -39,6 +39,17 @@ const scenes = {
   "koi-pond": lazy(() => import("./koi-pond/Scene")),
   "cup-reading": lazy(() => import("./cup-reading/Scene")),
   aurora: lazy(() => import("./aurora/Scene")),
+  // Batch 4
+  henna: lazy(() => import("./henna/Scene")),
+  "two-halves": lazy(() => import("./two-halves/Scene")),
+  "shadow-play": lazy(() => import("./shadow-play/Scene")),
+  fingerprint: lazy(() => import("./fingerprint/Scene")),
+  nest: lazy(() => import("./nest/Scene")),
+  "pet-rock": lazy(() => import("./pet-rock/Scene")),
+  scoreboard: lazy(() => import("./scoreboard/Scene")),
+  "excuse-machine": lazy(() => import("./excuse-machine/Scene")),
+  "burnt-dinner": lazy(() => import("./burnt-dinner/Scene")),
+  "big-screen": lazy(() => import("./big-screen/Scene")),
 } as const;
 
 export const registry: Record<string, GiftDef> = Object.fromEntries(

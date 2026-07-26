@@ -159,6 +159,106 @@ export function clack(opts: ClackOptions = {}): void {
   src.stop(t + decay + 0.02);
 }
 
+interface SwellOptions {
+  /** "noise" for a crowd or a hiss, or an oscillator type for a pitched drone. */
+  source?: "noise" | OscillatorType;
+  /** Pitch in Hz. Oscillator sources only — ignored for noise. */
+  freq?: number;
+  filter?: BiquadFilterType;
+  /** Filter cutoff (lowpass) or centre (bandpass) in Hz. */
+  cutoff?: number;
+  q?: number;
+  /** Envelope in seconds; total length is their sum. */
+  attack?: number;
+  hold?: number;
+  release?: number;
+  gain?: number;
+  /** Amplitude wobble in Hz — a purr is a slow one, ~22Hz. 0 = steady. */
+  tremolo?: number;
+  /** How much of the level the wobble takes away at its trough, 0..1. */
+  tremoloDepth?: number;
+  when?: number;
+}
+
+/**
+ * A *sustained* filtered voice with a rise-hold-fall envelope — the shape neither
+ * `clack` (one dry burst) nor `tone` (a decaying blip) can make. Two users, one
+ * helper: `big-screen` swells looped noise through a bandpass into a crowd roar,
+ * and `pet-rock` purrs a tremolo'd sawtooth through a lowpass. Fire-and-forget
+ * like the rest of this module: a purr that has to keep going is a burst re-fired
+ * per beat (which is also what a real purr is), not a handle to hold onto.
+ */
+export function swell(opts: SwellOptions = {}): void {
+  const c = getAudioCtx();
+  if (!c) return;
+  const {
+    source = "noise",
+    freq = 90,
+    filter = source === "noise" ? "bandpass" : "lowpass",
+    cutoff = source === "noise" ? 700 : 420,
+    q = 0.9,
+    attack = 0.4,
+    hold = 0.6,
+    release = 1.2,
+    gain = 0.3,
+    tremolo = 0,
+    tremoloDepth = 0.7,
+    when = 0,
+  } = opts;
+
+  const t = c.currentTime + when;
+  const end = t + attack + hold + release;
+
+  let src: AudioBufferSourceNode | OscillatorNode;
+  if (source === "noise") {
+    const buf = c.createBufferSource();
+    buf.buffer = whiteNoise(c);
+    // whiteNoise is a 0.4s buffer and a roar runs for seconds — loop it. The
+    // bandpass and the envelope both smear the seam past hearing.
+    buf.loop = true;
+    src = buf;
+  } else {
+    const osc = c.createOscillator();
+    osc.type = source;
+    osc.frequency.setValueAtTime(freq, t);
+    src = osc;
+  }
+
+  const bq = c.createBiquadFilter();
+  bq.type = filter;
+  bq.frequency.value = cutoff;
+  bq.Q.value = q;
+
+  const env = c.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(gain, t + attack);
+  env.gain.setValueAtTime(gain, t + attack + hold);
+  env.gain.exponentialRampToValueAtTime(0.0001, end);
+
+  src.connect(bq);
+  let tail: AudioNode = bq;
+  if (tremolo > 0) {
+    // The wobble multiplies the signal: a gain parked at (1 - depth) with an LFO
+    // swinging `depth` on top of it, so the trough is (1-depth) and the peak is 1.
+    const trem = c.createGain();
+    trem.gain.value = 1 - tremoloDepth;
+    const lfo = c.createOscillator();
+    lfo.frequency.value = tremolo;
+    const depth = c.createGain();
+    depth.gain.value = tremoloDepth;
+    lfo.connect(depth);
+    depth.connect(trem.gain);
+    lfo.start(t);
+    lfo.stop(end + 0.02);
+    bq.connect(trem);
+    tail = trem;
+  }
+  tail.connect(env);
+  env.connect(c.destination);
+  src.start(t);
+  src.stop(end + 0.02);
+}
+
 interface ToneOptions {
   type?: OscillatorType;
   seconds?: number;
