@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { useMutation, useQuery } from "convex/react";
+import { useEffect, useMemo } from "react";
+import { useMutation, useQueries } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useLang } from "@/i18n";
 
@@ -12,7 +12,15 @@ const HOUR = 60 * 60 * 1000;
 // number is live — Convex is reactive, so others' visits update it in place.
 export function VisitorCounter({ className = "" }: { className?: string }) {
   const { lang, t } = useLang();
-  const count = useQuery(api.gifts.getVisitors);
+  // useQueries, not useQuery: it hands back a backend error as a *value* instead
+  // of throwing. A vanity counter must never take the whole Home page down with
+  // it — an undeployed function or a blip should just hide the number.
+  // The useMemo is load-bearing (React Compiler notwithstanding): useQueries
+  // keys its subscription on this object's identity, so a fresh literal each
+  // render would resubscribe on every render. useQuery memoizes it internally.
+  const { count } = useQueries(
+    useMemo(() => ({ count: { query: api.gifts.getVisitors, args: {} } }), []),
+  );
   const bump = useMutation(api.gifts.bumpVisitors);
 
   // Count a visitor at most once an hour — refreshing within the window is free.
@@ -27,8 +35,9 @@ export function VisitorCounter({ className = "" }: { className?: string }) {
       .catch(() => {});
   }, [bump]);
 
-  // Wait for the count so we never flash a 0 or shift layout on load.
-  if (count === undefined) return null;
+  // Wait for the count so we never flash a 0 or shift layout on load. Non-number
+  // covers both states we render nothing for: undefined (loading) and Error.
+  if (typeof count !== "number") return null;
 
   return (
     <div className={`inline-flex items-center gap-2.5 ${className}`}>

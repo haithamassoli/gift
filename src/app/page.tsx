@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useQuery } from "convex/react";
+import { useQueries } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { GiftPreviewCard } from "@/components/GiftPreviewCard";
 import { Logo } from "@/components/Logo";
@@ -25,12 +25,30 @@ export default function Home() {
   }, []);
 
   // One batch receipt query for the whole history → O(1) per-row status lookup.
-  const statuses = useQuery(
-    api.gifts.getStatuses,
-    entries.length ? { statusKeys: entries.map((e) => e.statusKey) } : "skip",
+  // useQueries returns a backend error as a value rather than throwing, so a
+  // failed receipt lookup drops the opened/not-opened badges instead of
+  // replacing the entire gallery with the error page.
+  // useMemo is load-bearing: useQueries keys its subscription on this object's
+  // identity, so a fresh literal each render would resubscribe every render.
+  // `entries` only changes on the mount read and on clear.
+  const { statuses } = useQueries(
+    useMemo(
+      () =>
+        entries.length
+          ? {
+              statuses: {
+                query: api.gifts.getStatuses,
+                args: { statusKeys: entries.map((e) => e.statusKey) },
+              },
+            }
+          : {},
+      [entries],
+    ),
   );
   const openedByKey = new Map<string, number | null>(
-    (statuses ?? []).map((s) => [s.statusKey, s.openedAt]),
+    Array.isArray(statuses)
+      ? statuses.map((s) => [s.statusKey, s.openedAt])
+      : [],
   );
 
   // Derived during render — no effect, no memo (React Compiler handles it).
