@@ -50,6 +50,13 @@ const scenes = {
   "excuse-machine": lazy(() => import("./excuse-machine/Scene")),
   "burnt-dinner": lazy(() => import("./burnt-dinner/Scene")),
   "big-screen": lazy(() => import("./big-screen/Scene")),
+  // Batch 5
+  receipt: lazy(() => import("./receipt/Scene")),
+  bakhoor: lazy(() => import("./bakhoor/Scene")),
+  plaster: lazy(() => import("./plaster/Scene")),
+  mortarboard: lazy(() => import("./mortarboard/Scene")),
+  "paper-plane": lazy(() => import("./paper-plane/Scene")),
+  maamoul: lazy(() => import("./maamoul/Scene")),
 } as const;
 
 export const registry: Record<string, GiftDef> = Object.fromEntries(

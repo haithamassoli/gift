@@ -57,9 +57,11 @@ export type Occasion =
   | "birthday"
   | "celebration"
   | "congrats"
+  | "graduation"
   | "thanks"
   | "apology"
   | "funny"
+  | "get-well"
   | "thinking-of-you";
 
 export const occasions: { key: Occasion; label: string; labelAr: string }[] = [
@@ -68,9 +70,11 @@ export const occasions: { key: Occasion; label: string; labelAr: string }[] = [
   { key: "birthday", label: "Birthday", labelAr: "عيد ميلاد" },
   { key: "celebration", label: "Eid & celebration", labelAr: "عيد ومناسبة" },
   { key: "congrats", label: "Congrats", labelAr: "تهنئة" },
+  { key: "graduation", label: "Graduation", labelAr: "تخرّج" },
   { key: "thanks", label: "Thank you", labelAr: "شكرًا" },
   { key: "apology", label: "Sorry", labelAr: "اعتذار" },
   { key: "funny", label: "For a laugh", labelAr: "على الضحك" },
+  { key: "get-well", label: "Get well", labelAr: "سلامتك" },
   { key: "thinking-of-you", label: "Thinking of you", labelAr: "أفكّر بك" },
 ];
 
@@ -1190,6 +1194,181 @@ export const catalog: Record<string, GiftCatalogEntry> = {
       },
     ],
   },
+  // ---- Batch 5: occasions the gallery couldn't answer (thanks, get well, graduation, Eid) ----
+  receipt: {
+    id: "receipt",
+    name: "Receipt of Thanks",
+    nameAr: "فاتورة الجميل",
+    tagline: "Itemised. Unpayable.",
+    taglineAr: "مفصّلة… ولا تُسدَّد",
+    variants: [
+      {
+        key: "paper",
+        label: "Paper",
+        labelAr: "الورق",
+        options: opts(
+          ["white", "White", "أبيض"],
+          ["pink", "Pink", "وردي"],
+          ["canary", "Canary", "أصفر"],
+        ),
+      },
+      {
+        key: "printer",
+        label: "Printer",
+        labelAr: "الطابعة",
+        options: opts(
+          ["charcoal", "Charcoal", "فحمي"],
+          ["cream", "Cream", "كريمي"],
+          ["mint", "Mint", "نعناعي"],
+        ),
+      },
+    ],
+  },
+  bakhoor: {
+    id: "bakhoor",
+    name: "Mabkhara",
+    nameAr: "المبخرة",
+    tagline: "Your words, in the smoke that welcomes guests",
+    taglineAr: "كلماتك في الدخان الذي يستقبل الضيوف",
+    variants: [
+      {
+        key: "burner",
+        label: "Burner",
+        labelAr: "المبخرة",
+        options: opts(
+          ["wood", "Carved wood", "خشب منقوش"],
+          ["silver", "Silver", "فضة"],
+          ["ceramic", "Ceramic", "خزف"],
+        ),
+      },
+      {
+        key: "scent",
+        label: "Scent",
+        labelAr: "العطر",
+        options: opts(
+          ["oud", "Oud", "عود"],
+          ["rose", "Rose", "ورد"],
+          ["musk", "Musk", "مسك"],
+        ),
+      },
+    ],
+  },
+  plaster: {
+    id: "plaster",
+    name: "Get-Well Plaster",
+    nameAr: "لزقة الشفاء",
+    tagline: "Peel slowly. It's healed.",
+    taglineAr: "انزعها بهدوء… لقد طاب",
+    variants: [
+      {
+        key: "plaster",
+        label: "Plaster",
+        labelAr: "اللزقة",
+        options: opts(
+          ["classic", "Classic", "كلاسيكية"],
+          ["stars", "Stars", "نجوم"],
+          ["clear", "Clear", "شفافة"],
+        ),
+      },
+      {
+        key: "heart",
+        label: "Heart",
+        labelAr: "القلب",
+        options: opts(
+          ["red", "Red", "أحمر"],
+          ["pink", "Pink", "وردي"],
+          ["blue", "Blue", "أزرق"],
+        ),
+      },
+    ],
+  },
+  mortarboard: {
+    id: "mortarboard",
+    name: "Cap Toss",
+    nameAr: "رمية التخرّج",
+    tagline: "Throw it high. You earned the sky.",
+    taglineAr: "ارمِها عاليًا… السماء لك",
+    variants: [
+      {
+        key: "cap",
+        label: "Cap",
+        labelAr: "القبعة",
+        options: opts(
+          ["black", "Black", "أسود"],
+          ["navy", "Navy", "كحلي"],
+          ["maroon", "Maroon", "عنّابي"],
+        ),
+      },
+      {
+        key: "tassel",
+        label: "Tassel",
+        labelAr: "الشرّابة",
+        options: opts(
+          ["gold", "Gold", "ذهبي"],
+          ["silver", "Silver", "فضي"],
+          ["crimson", "Crimson", "قرمزي"],
+        ),
+      },
+    ],
+  },
+  "paper-plane": {
+    id: "paper-plane",
+    name: "Paper Plane",
+    nameAr: "طيّارة ورق",
+    tagline: "Thrown from far away, landed right here",
+    taglineAr: "رُميت من بعيد… وهبطت هنا تمامًا",
+    variants: [
+      {
+        key: "paper",
+        label: "Paper",
+        labelAr: "الورق",
+        options: opts(
+          ["notebook", "Notebook", "دفتر"],
+          ["airmail", "Airmail", "بريد جوي"],
+          ["kraft", "Kraft", "ورق بنّي"],
+        ),
+      },
+      {
+        key: "sky",
+        label: "Sky",
+        labelAr: "السماء",
+        options: opts(
+          ["morning", "Morning", "صباح"],
+          ["sunset", "Sunset", "غروب"],
+          ["night", "Night", "ليل"],
+        ),
+      },
+    ],
+  },
+  maamoul: {
+    id: "maamoul",
+    name: "Ma'amoul Mold",
+    nameAr: "قالب المعمول",
+    tagline: "Knock it out, the pattern is yours",
+    taglineAr: "اطرقه… والنقش لك",
+    variants: [
+      {
+        key: "mold",
+        label: "Mold",
+        labelAr: "القالب",
+        options: opts(
+          ["date", "Date (round)", "تمر (مدوّر)"],
+          ["pistachio", "Pistachio (oval)", "فستق (بيضاوي)"],
+          ["walnut", "Walnut (cone)", "جوز (مخروطي)"],
+        ),
+      },
+      {
+        key: "board",
+        label: "Board",
+        labelAr: "اللوح",
+        options: opts(
+          ["walnut", "Walnut wood", "خشب الجوز"],
+          ["olive", "Olive wood", "خشب الزيتون"],
+          ["marble", "Marble", "رخام"],
+        ),
+      },
+    ],
+  },
 };
 
 // Occasion tags per scene — one editable block instead of a field scattered
@@ -1240,4 +1419,10 @@ export const occasionsById: Record<string, Occasion[]> = {
   "excuse-machine": ["funny", "apology"],
   "burnt-dinner": ["funny", "apology"],
   "big-screen": ["funny", "love"],
+  receipt: ["thanks", "funny"],
+  bakhoor: ["celebration", "thanks"],
+  plaster: ["get-well", "apology"],
+  mortarboard: ["graduation", "congrats"],
+  "paper-plane": ["thinking-of-you", "love"],
+  maamoul: ["celebration", "thanks"],
 };
