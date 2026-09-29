@@ -14,7 +14,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "convex": "^1.42.2",
-    "next": "16.3.0-preview.6",
+    "next": "^16.3.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
