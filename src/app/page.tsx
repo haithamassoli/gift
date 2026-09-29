@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useQueries } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -16,6 +16,7 @@ export default function Home() {
   const { lang, t } = useLang();
   const [occasion, setOccasion] = useState<Occasion | null>(null);
   const [entries, setEntries] = useState<SentEntry[]>([]);
+  const reel = useRef<HTMLDialogElement>(null);
 
   // localStorage is client-only and the page is prerendered — read after mount,
   // not in a lazy initializer, so SSR/hydration render sees an empty list.
@@ -66,9 +67,42 @@ export default function Home() {
       lang={lang}
       className="mx-auto max-w-4xl px-6 py-16"
     >
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            reel.current?.showModal();
+            void reel.current?.querySelector("video")?.play();
+          }}
+          aria-label={t.home.showreel}
+          title={t.home.showreel}
+          className="grid h-8 w-8 place-items-center rounded-full border border-white/15 text-stone-300 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+        >
+          <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
+            <path d="M7 4.5v15l13-7.5z" />
+          </svg>
+        </button>
         <LangToggle />
       </div>
+      {/* Native <dialog>: Esc/backdrop-close and focus trap for free; the video
+          pauses on close so audio doesn't keep playing behind the page. */}
+      <dialog
+        ref={reel}
+        aria-label={t.home.showreel}
+        onClick={(e) => e.target === e.currentTarget && reel.current?.close()}
+        onClose={() => reel.current?.querySelector("video")?.pause()}
+        className="m-auto w-[min(92vw,960px)] rounded-2xl bg-black p-0 backdrop:bg-black/80"
+      >
+        <video src="/showreel.mp4" controls playsInline preload="none" className="block w-full" />
+        <button
+          type="button"
+          onClick={() => reel.current?.close()}
+          aria-label={t.home.close}
+          className="absolute end-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+        >
+          ✕
+        </button>
+      </dialog>
       <header className="mb-8 text-center">
         <Logo className="mx-auto h-16 w-16" />
         <h1 className="mt-4 font-serif text-6xl tracking-tight text-stone-100 sm:text-7xl">
